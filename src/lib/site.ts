@@ -1,13 +1,13 @@
 // Change these in ONE place — used by header, footer, WhatsApp button and Contact page.
 export const SITE = {
-  name: 'Mughal Treasure',
+  name: 'Mughal Treasure Tech',
   whatsapp: '923078867068', // 92 + number without leading 0
   phoneDisplay: '0307 8867068',
-  email: 'support@mughaltreasure.pk',
+  email: 'mughaltreasuretechofficial@gmail.com',
   city: 'Lahore, Pakistan',
   hours: 'Mon–Sat, 10am – 8pm',
 }
-export const waLink = (text = 'Assalam o Alaikum! I have a question about Mughal Treasure.') =>
+export const waLink = (text = 'Assalam o Alaikum! I have a question about Mughal Treasure Tech.') =>
   `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`
 
 import type { PlacedOrder } from '@/lib/orders-local'

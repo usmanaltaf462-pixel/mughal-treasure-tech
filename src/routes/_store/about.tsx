@@ -6,8 +6,8 @@ export const Route = createFileRoute('/_store/about')({ component: About })
 function About() {
   return (
     <PageShell title="About Us" ur="ہمارے بارے میں">
-      <p>Mughal Treasure brings the best of Pakistani craftsmanship to your doorstep — from embroidered lawn and khussas to kundan jewellery, blue pottery and handmade décor.</p>
-      <p>We work directly with artisans and trusted makers across Pakistan, hand-pick every item, and check quality before it ships. Our aim is simple: authentic products, fair prices, and a shopping experience you can trust.</p>
+      <p>Mughal Treasure Tech brings useful electronics and fun kids items to your doorstep — from earbuds, neckbands and chargers to toys and school essentials.</p>
+      <p>We choose every product carefully, test it before it ships, and keep prices fair. Our aim is simple: genuine products and a shopping experience you can trust.</p>
       <h2>Why shop with us</h2>
       <ul>
         <li>Cash on Delivery all over Pakistan</li>

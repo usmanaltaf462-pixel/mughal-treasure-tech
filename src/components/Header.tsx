@@ -25,7 +25,7 @@ export function Header() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         type="search"
-        placeholder="Search suits, jewellery, décor…  |  تلاش کریں"
+        placeholder="Search earbuds, chargers, toys…  |  تلاش کریں"
         className="h-11 w-full rounded-full border border-ink/10 bg-cream pl-10 pr-4 text-base sm:text-sm outline-none transition placeholder:text-ink/40 focus:border-brand-400 focus:bg-white focus:ring-4 focus:ring-brand-100"
       />
     </form>

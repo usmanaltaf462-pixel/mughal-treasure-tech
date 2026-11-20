@@ -35,7 +35,7 @@ export const Route = createFileRoute('/_store/shop')({
     max: Number(s.max) > 0 ? Number(s.max) : undefined,
     sort: SORTS.some((o) => o.value === s.sort) ? (s.sort as Sort) : undefined,
   }),
-  head: () => ({ meta: [{ title: 'Shop — Mughal Treasure' }] }),
+  head: () => ({ meta: [{ title: 'Shop — Mughal Treasure Tech' }] }),
   component: Shop,
 })
 

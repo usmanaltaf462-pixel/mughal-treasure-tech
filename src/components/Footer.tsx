@@ -8,7 +8,7 @@ const perks = [
   { icon: Banknote, title: 'Cash on Delivery', ur: 'ڈیلیوری پر ادائیگی', text: 'Pay when your parcel arrives' },
   { icon: Truck, title: 'Nationwide Delivery', ur: 'پورے پاکستان میں', text: '2–5 working days' },
   { icon: RotateCcw, title: '7-Day Easy Returns', ur: 'آسان واپسی', text: 'Hassle-free exchanges' },
-  { icon: ShieldCheck, title: 'Quality Assured', ur: 'معیار کی ضمانت', text: 'Handpicked artisans' },
+  { icon: ShieldCheck, title: 'Quality Assured', ur: 'معیار کی ضمانت', text: 'Genuine, tested products' },
 ]
 
 export function Perks() {
@@ -36,7 +36,7 @@ export function Footer() {
         <div className="space-y-4">
           <Logo light />
           <p className="text-sm leading-relaxed">
-            Treasures of Pakistani craftsmanship — fashion, jewellery and home décor, delivered to your doorstep with Cash on Delivery.
+            Electronics and kids items you can trust — delivered to your doorstep all over Pakistan with Cash on Delivery.
           </p>
         </div>
         <div>
@@ -71,7 +71,7 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs sm:flex-row">
-          <p>© {new Date().getFullYear()} Mughal Treasure. All prices in PKR.</p>
+          <p>© {new Date().getFullYear()} Mughal Treasure Tech. All prices in PKR.</p>
           <p className="urdu text-sm">پاکستانی دستکاری کے خزانے</p>
         </div>
       </div>

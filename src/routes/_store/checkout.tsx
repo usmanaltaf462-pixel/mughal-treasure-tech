@@ -9,7 +9,7 @@ import { placeOrder } from '@/lib/orders-local'
 import { OrderSummary } from '@/components/OrderSummary'
 
 export const Route = createFileRoute('/_store/checkout')({
-  head: () => ({ meta: [{ title: 'Checkout — Mughal Treasure' }] }),
+  head: () => ({ meta: [{ title: 'Checkout — Mughal Treasure Tech' }] }),
   component: Checkout,
 })
 

@@ -8,7 +8,7 @@ import { getPlacedOrder } from '@/lib/orders-local'
 import type { PlacedOrder } from '@/lib/orders-local'
 
 export const Route = createFileRoute('/_store/order/$orderId')({
-  head: () => ({ meta: [{ title: 'Order Confirmed — Mughal Treasure' }] }),
+  head: () => ({ meta: [{ title: 'Order Confirmed — Mughal Treasure Tech' }] }),
   component: OrderConfirmation,
 })
 

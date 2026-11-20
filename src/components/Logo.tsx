@@ -10,10 +10,10 @@ export function Logo({ light = false }: { light?: boolean }) {
         </svg>
       </span>
       <span className="leading-none">
-        <span className={`block font-display text-xl font-bold tracking-tight ${light ? 'text-white' : 'text-ink'}`}>
-          Mughal <span className="text-brand-500">Treasure</span>
+        <span className={`block font-display text-lg sm:text-xl font-bold tracking-tight ${light ? 'text-white' : 'text-ink'}`}>
+          Mughal <span className="text-brand-500">Treasure</span> Tech
         </span>
-        <span className={`urdu block text-[11px] leading-[1.6] ${light ? 'text-white/70' : 'text-ink/50'}`}>مغل ٹریژر</span>
+        <span className={`urdu block text-[11px] leading-[1.6] ${light ? 'text-white/70' : 'text-ink/50'}`}>مغل ٹریژر ٹیک</span>
       </span>
     </span>
   )

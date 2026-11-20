@@ -3,9 +3,9 @@ import { CartProvider } from '@/lib/cart'
 
 import '../styles.css'
 
-const siteName = 'Mughal Treasure — Pakistani Fashion, Jewellery & Home Décor'
+const siteName = 'Mughal Treasure Tech — Electronics & Kids Items in Pakistan'
 const siteDescription =
-  'Shop embroidered suits, kundan jewellery, khussas, blue pottery and more. Cash on Delivery all over Pakistan.'
+  'Shop earbuds, neckbands, chargers, smart watches and kids items. Cash on Delivery all over Pakistan.'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -18,7 +18,7 @@ export const Route = createRootRoute({
       { property: 'og:title', content: siteName },
       { property: 'og:description', content: siteDescription },
       { property: 'og:type', content: 'website' },
-      { property: 'og:image', content: '/.netlify/images?url=/img/hero-main.webp&w=1200&fm=jpg' },
+      { property: 'og:image', content: '/img/hero-main.webp' },
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
     links: [

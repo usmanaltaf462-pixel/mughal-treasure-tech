@@ -5,12 +5,9 @@ export function formatPKR(amount: number) {
 
 /** Route an image in /public through the Netlify Image CDN. */
 export function img(src: string, w: number, h?: number) {
-  const params = new URLSearchParams({ url: src, w: String(w), fm: 'webp', q: '78' })
-  if (h) {
-    params.set('h', String(h))
-    params.set('fit', 'cover')
-  }
-  return `/.netlify/images?${params.toString()}`
+  void w
+  void h
+  return src
 }
 
 export function formatDate(iso: string) {

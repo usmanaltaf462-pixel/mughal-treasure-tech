@@ -3,7 +3,7 @@ import { BarChart3, ExternalLink, Info, LayoutDashboard, Package, ShoppingCart, 
 import { Logo } from '@/components/Logo'
 
 export const Route = createFileRoute('/admin')({
-  head: () => ({ meta: [{ title: 'Admin — Mughal Treasure' }, { name: 'robots', content: 'noindex, nofollow' }] }),
+  head: () => ({ meta: [{ title: 'Admin — Mughal Treasure Tech' }, { name: 'robots', content: 'noindex, nofollow' }] }),
   component: AdminLayout,
 })
 

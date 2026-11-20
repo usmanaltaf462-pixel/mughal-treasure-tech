@@ -13,27 +13,27 @@ export const Route = createFileRoute('/_store/')({
 const banners = [
   {
     image: '/img/hero-main.webp',
-    eyebrow: 'New Festive Collection',
-    title: 'Treasures of Pakistani craft',
-    titleUr: 'پاکستانی ہنر کے خزانے',
-    text: 'Embroidered suits, kundan jewellery and handmade décor — delivered with Cash on Delivery.',
-    cta: { label: 'Shop the collection', search: {} },
+    eyebrow: 'New Arrivals',
+    title: 'Smart tech for everyday life',
+    titleUr: 'روزمرہ کے لیے سمارٹ ٹیک',
+    text: 'Earbuds, neckbands, chargers and smart watches — delivered with Cash on Delivery.',
+    cta: { label: 'Shop electronics', search: { category: 'electronics' } },
   },
   {
     image: '/img/hero-eid.webp',
-    eyebrow: 'Eid Sale · Up to 30% Off',
-    title: 'Gifts that feel like home',
-    titleUr: 'عید کے تحفے',
-    text: 'Curated festive picks for the whole family, at prices made for celebration.',
+    eyebrow: 'Special Deals',
+    title: 'Great prices, genuine products',
+    titleUr: 'خصوصی رعایت',
+    text: 'Pick up your favourites at prices made for everyone.',
     cta: { label: 'Shop the sale', search: { sale: true } },
   },
   {
     image: '/img/hero-home.webp',
-    eyebrow: 'Home Décor',
-    title: 'Rooms with Mughal soul',
-    titleUr: 'گھر کی سجاوٹ',
-    text: 'Hand-knotted rugs, blue pottery, ajrak and brass — styled for modern Pakistani homes.',
-    cta: { label: 'Explore décor', search: { category: 'home-decor' } },
+    eyebrow: 'Kids Items',
+    title: 'Fun picks for little ones',
+    titleUr: 'بچوں کے لیے',
+    text: 'Toys, school bags and bottles that kids love and parents trust.',
+    cta: { label: 'Explore kids items', search: { category: 'kids' } },
   },
 ]
 
@@ -143,7 +143,7 @@ function Home() {
           <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_1.4fr]">
             <div>
               <p className="text-sm font-bold uppercase tracking-wider text-brand-100">Limited-time deals</p>
-              <h2 className="mt-2 font-display text-3xl font-bold sm:text-4xl">Up to 30% off festive favourites</h2>
+              <h2 className="mt-2 font-display text-3xl font-bold sm:text-4xl">Special offers on top picks</h2>
               <p className="urdu mt-1 text-lg text-brand-100">خصوصی رعایت</p>
               <Link to="/shop" search={{ sale: true }} className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-brand-700 hover:bg-brand-50">
                 Shop all deals <ArrowRight className="h-4 w-4" />

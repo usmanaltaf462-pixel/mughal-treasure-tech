@@ -6,7 +6,7 @@ import { OrderSummary } from '@/components/OrderSummary'
 import { formatPKR, img } from '@/lib/format'
 
 export const Route = createFileRoute('/_store/cart')({
-  head: () => ({ meta: [{ title: 'Shopping Cart — Mughal Treasure' }] }),
+  head: () => ({ meta: [{ title: 'Shopping Cart — Mughal Treasure Tech' }] }),
   component: CartPage,
 })
 
