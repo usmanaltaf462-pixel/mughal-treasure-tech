@@ -130,7 +130,7 @@ function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4">
-        <SectionTitle title="Featured Treasures" ur="منتخب مصنوعات" to={<Link to="/shop" className="text-sm font-semibold text-brand-600 hover:underline">See more</Link>} />
+        <SectionTitle title="Featured Products" ur="منتخب مصنوعات" to={<Link to="/shop" className="text-sm font-semibold text-brand-600 hover:underline">See more</Link>} />
         <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
           {featured.slice(0, 8).map((p) => (
             <ProductCard key={p.id} product={p} />

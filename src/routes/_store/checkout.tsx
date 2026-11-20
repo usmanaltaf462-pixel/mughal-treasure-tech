@@ -89,7 +89,7 @@ function Checkout() {
     return (
       <div className="mx-auto max-w-md px-4 py-24 text-center">
         <h1 className="text-2xl font-bold">Your cart is empty</h1>
-        <p className="mt-2 text-ink/60">Add a few treasures before checking out.</p>
+        <p className="mt-2 text-ink/60">Add a few items before checking out.</p>
         <Link to="/shop" className="mt-6 inline-block rounded-full bg-brand-500 px-8 py-3.5 font-semibold text-white">Browse products</Link>
       </div>
     )
