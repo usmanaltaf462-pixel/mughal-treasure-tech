@@ -25,7 +25,7 @@
     "featured": true,
     "isNew": true,
     "createdAt": "2026-11-21",
-    "hidden": true
+    "hidden": false
   },
   {
     "id": "p-2002",
