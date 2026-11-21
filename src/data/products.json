@@ -1,5 +1,33 @@
 [
   {
+    "id": "p-1795286148245",
+    "slug": "wireless-earbuds-0plf",
+    "name": "Wireless Earbuds",
+    "nameUr": "Wireless Earbuds",
+    "categoryId": "c-electronics",
+    "images": [
+      "/img/wireless-earbuds-0plf-1.webp",
+      "/img/wireless-earbuds-0plf-2.webp",
+      "/img/wireless-earbuds-0plf-3.webp"
+    ],
+    "shortDescription": "Enjoy music on the go with these wireless earbuds",
+    "description": "These earbuds are designed for comfort and convenience. They have a sleek design and are easy to use. The earbuds are perfect for listening to music or taking calls on the go.",
+    "highlights": [
+      "Wireless connectivity",
+      "Comfortable design",
+      "Easy to use",
+      "Perfect for music and calls"
+    ],
+    "price": 750,
+    "salePrice": 650,
+    "stock": 20,
+    "rating": 0,
+    "reviews": 0,
+    "featured": true,
+    "isNew": true,
+    "createdAt": "2026-11-21"
+  },
+  {
     "id": "p-2001",
     "slug": "i12-tws-wireless-earbuds",
     "name": "i12 TWS Wireless Earbuds",
