@@ -63,6 +63,7 @@ function ProductPage() {
           <p className="text-xs font-bold uppercase tracking-wider text-brand-600">{category?.name}</p>
           <h1 className="mt-2 font-display text-3xl font-bold leading-tight sm:text-4xl">{product.name}</h1>
           <p className="urdu text-lg text-ink/60">{product.nameUr}</p>
+          {product.reviews > 0 && (
           <div className="mt-2 flex items-center gap-2 text-sm">
             <span className="flex items-center gap-0.5">
               {Array.from({ length: 5 }, (_, i) => (
@@ -72,6 +73,7 @@ function ProductPage() {
             <span className="font-semibold">{product.rating.toFixed(1)}</span>
             <span className="text-ink/50">({product.reviews} reviews)</span>
           </div>
+          )}
 
           <div className="mt-5">
             <Price product={product} size="lg" />

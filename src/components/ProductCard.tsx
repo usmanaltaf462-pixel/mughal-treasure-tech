@@ -34,9 +34,11 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
         <div className="flex items-center justify-between gap-2 text-[11px] font-medium uppercase tracking-wide text-ink/45">
           <span className="truncate">{category?.name}</span>
-          <span className="flex shrink-0 items-center gap-0.5 normal-case text-ink/60">
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {product.rating.toFixed(1)}
-          </span>
+          {product.reviews > 0 && (
+            <span className="flex shrink-0 items-center gap-0.5 normal-case text-ink/60">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {product.rating.toFixed(1)}
+            </span>
+          )}
         </div>
         <Link to="/product/$slug" params={{ slug: product.slug }} className="line-clamp-2 text-sm font-semibold leading-snug text-ink hover:text-brand-600 sm:text-[15px]">
           {product.name}

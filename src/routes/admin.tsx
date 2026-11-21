@@ -1,74 +1,193 @@
-import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
-import { BarChart3, ExternalLink, Info, LayoutDashboard, Package, ShoppingCart, Users } from 'lucide-react'
-import { Logo } from '@/components/Logo'
+import { useEffect, useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/admin')({
-  head: () => ({ meta: [{ title: 'Admin — Mughal Treasure Tech' }, { name: 'robots', content: 'noindex, nofollow' }] }),
-  component: AdminLayout,
+  head: () => ({ meta: [{ title: 'Admin — Mughal Treasure Tech' }, { name: 'robots', content: 'noindex,nofollow' }] }),
+  component: Admin,
 })
 
-const nav = [
-  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
-  { to: '/admin/products', label: 'Products', icon: Package },
-  { to: '/admin/customers', label: 'Customers', icon: Users },
-  { to: '/admin/reports', label: 'Reports', icon: BarChart3 },
-] as const
+type P = Record<string, any>
+const empty = { name: '', nameUr: '', shortDescription: '', description: '', highlights: '' }
 
-function AdminLayout() {
+async function shrink(file: File): Promise<string> {
+  const bmp = await createImageBitmap(file)
+  const k = Math.min(1, 1000 / Math.max(bmp.width, bmp.height))
+  const c = document.createElement('canvas')
+  c.width = Math.round(bmp.width * k)
+  c.height = Math.round(bmp.height * k)
+  c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height)
+  return c.toDataURL('image/webp', 0.82)
+}
+
+function Admin() {
+  const [key, setKey] = useState('')
+  const [products, setProducts] = useState<P[] | null>(null)
+  const [msg, setMsg] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [imgs, setImgs] = useState<string[]>([])
+  const [cat, setCat] = useState('c-electronics')
+  const [price, setPrice] = useState('')
+  const [sale, setSale] = useState('')
+  const [stock, setStock] = useState('20')
+  const [f, setF] = useState(empty)
+  const [tab, setTab] = useState<'products' | 'orders' | 'sales'>('products')
+  const [orders, setOrders] = useState<P[] | null>(null)
+
+  useEffect(() => { try { setKey(localStorage.getItem('adminKey') || '') } catch { /* ignore */ } }, [])
+
+  async function api(path: string, body?: unknown) {
+    const res = await fetch(path, {
+      method: body ? 'POST' : 'GET',
+      headers: { 'x-admin-key': key, 'content-type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(data.error || `Error ${res.status}`)
+    return data
+  }
+  async function run(label: string, fn: () => Promise<void>) {
+    setBusy(true); setMsg(label)
+    try { await fn() } catch (e: any) { setMsg('❌ ' + e.message) }
+    setBusy(false)
+  }
+  const login = () => run('Login ho raha hai…', async () => {
+    try { localStorage.setItem('adminKey', key) } catch { /* ignore */ }
+    setProducts(await api('/api/products')); setMsg('')
+  })
+  const loadOrders = () => run('Orders load ho rahe hain…', async () => { setOrders(await api('/api/orders')); setMsg('') })
+  const go = (t: 'products' | 'orders' | 'sales') => { setTab(t); if (t !== 'products') loadOrders() }
+  const setStatus = (o: P, status: string) => run('Status update ho raha hai…', async () => {
+    await api('/api/order-status', { id: o.id, status })
+    setOrders((orders || []).map((x) => (x.id === o.id ? { ...x, status } : x))); setMsg('✅ Update ho gaya')
+  })
+  const wa = (ph: string) => 'https://wa.me/' + ph.replace(/\D/g, '').replace(/^0/, '92')
+  const live = (orders || []).filter((o) => o.status !== 'cancelled')
+  const since = (d: number) => live.filter((o) => Date.now() - new Date(o.created_at).getTime() < d * 864e5)
+  const sum = (l: P[]) => l.reduce((a, o) => a + o.total, 0)
+  const top: Record<string, number> = {}
+  live.forEach((o) => o.items.forEach((i: P) => { top[i.name] = (top[i.name] || 0) + i.qty }))
+  const pick = async (files: FileList | null) => {
+    if (!files) return
+    setImgs(await Promise.all(Array.from(files).slice(0, 4).map(shrink)))
+  }
+  const generate = () => run('AI photo dekh raha hai (10-20 second)…', async () => {
+    const d = await api('/api/describe', { image: imgs[0], hint: cat === 'c-kids' ? 'kids item' : 'electronics' })
+    setF({ name: d.name, nameUr: d.nameUr, shortDescription: d.shortDescription, description: d.description, highlights: d.highlights.join('\n') })
+    setMsg('✅ Tayyar. Ab check karke edit kar lein.')
+  })
+  const commit = (list: P[], images: Record<string, string> = {}, done: string) =>
+    run('Publish ho raha hai…', async () => {
+      await api('/api/commit', { products: list, images })
+      setProducts(list); setMsg('✅ ' + done)
+    })
+  const publish = () => {
+    if (!imgs.length || !f.name || !price) return setMsg('Photo, naam aur qeemat zaroori hain.')
+    const slug = f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) + '-' + Date.now().toString(36).slice(-4)
+    const images: Record<string, string> = {}
+    imgs.forEach((d, i) => { images[`public/img/${slug}-${i + 1}.webp`] = d.split(',')[1] })
+    const p: P = {
+      id: 'p-' + Date.now(), slug, name: f.name, nameUr: f.nameUr || f.name, categoryId: cat,
+      images: imgs.map((_, i) => `/img/${slug}-${i + 1}.webp`),
+      shortDescription: f.shortDescription, description: f.description,
+      highlights: f.highlights.split('\n').map((s) => s.trim()).filter(Boolean),
+      price: Number(price), salePrice: sale ? Number(sale) : null, stock: Number(stock) || 0,
+      rating: 0, reviews: 0, featured: true, isNew: true, createdAt: new Date().toISOString().slice(0, 10),
+    }
+    commit([p, ...(products || [])], images, 'Publish ho gaya! 1-2 minute mein site par nazar aayega.').then(() => {
+      setImgs([]); setF(empty); setPrice(''); setSale('')
+    })
+  }
+  const del = (p: P) => confirm(`"${p.name}" delete karein?`) && commit((products || []).filter((x) => x.id !== p.id), {}, 'Delete ho gaya (1-2 minute mein site se hat jayega).')
+  const edit = (p: P) => {
+    const np = prompt(`${p.name}\nNayi qeemat:`, String(p.price)); if (np === null) return
+    const ns = prompt('Sale price (khali = koi nahi):', p.salePrice ? String(p.salePrice) : ''); if (ns === null) return
+    const nk = prompt('Stock:', String(p.stock)); if (nk === null) return
+    commit((products || []).map((x) => x.id === p.id ? { ...x, price: Number(np), salePrice: ns ? Number(ns) : null, stock: Number(nk) } : x), {}, 'Update ho gaya (1-2 minute mein site par).')
+  }
+
+  const inp = 'w-full rounded-xl border border-black/15 bg-white px-3 py-2.5 text-base'
+  const btn = 'rounded-full bg-brand-500 px-5 py-3 font-semibold text-white disabled:opacity-50'
   return (
-    <div className="min-h-screen bg-[#faf7f4] pb-20 lg:pb-0 lg:pl-64">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-ink/5 bg-white p-5 lg:flex">
-        <Link to="/admin"><Logo /></Link>
-        <p className="mt-1 pl-12 text-[11px] font-bold uppercase tracking-wider text-brand-600">Admin</p>
-        <nav className="mt-8 flex flex-col gap-1">
-          {nav.map((n) => (
-            <Link
-              key={n.to}
-              to={n.to}
-              activeOptions={{ exact: 'exact' in n }}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink/60 hover:bg-brand-50 hover:text-brand-700"
-              activeProps={{ className: '!bg-brand-500 !text-white shadow-md shadow-brand-500/30' }}
-            >
-              <n.icon className="h-4.5 w-4.5" /> {n.label}
-            </Link>
-          ))}
-        </nav>
-        <Link to="/" className="mt-auto flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/50 hover:bg-ink/5">
-          <ExternalLink className="h-4 w-4" /> View store
-        </Link>
-      </aside>
-
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-ink/5 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
-        <Link to="/admin"><Logo /></Link>
-        <Link to="/" className="flex items-center gap-1 rounded-full bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-700">
-          <ExternalLink className="h-3.5 w-3.5" /> Store
-        </Link>
-      </header>
-
-      <div className="mx-auto max-w-6xl px-4 py-5 lg:px-8 lg:py-8">
-        <div className="mb-5 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <Info className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            <b>Preview mode.</b> These screens show sample data so you can review the layout. Secure admin sign-in and live store data are the next items on the roadmap.
-          </p>
+    <div className="mx-auto max-w-xl space-y-5 p-4 pb-24">
+      <h1 className="font-display text-2xl font-bold">Admin — Products</h1>
+      {!products ? (
+        <div className="space-y-3">
+          <input className={inp} type="password" placeholder="Admin password" value={key} onChange={(e) => setKey(e.target.value)} />
+          <button className={btn} disabled={busy || !key} onClick={login}>Login</button>
         </div>
-        <Outlet />
-      </div>
-
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-ink/5 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
-        {nav.map((n) => (
-          <Link
-            key={n.to}
-            to={n.to}
-            activeOptions={{ exact: 'exact' in n }}
-            className="flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold text-ink/50"
-            activeProps={{ className: '!text-brand-600' }}
-          >
-            <n.icon className="h-5 w-5" /> {n.label}
-          </Link>
-        ))}
-      </nav>
+      ) : (
+        <>
+          <div className="flex gap-2">
+            {(['products', 'orders', 'sales'] as const).map((t) => (
+              <button key={t} onClick={() => go(t)} className={'rounded-full px-4 py-2 text-sm font-semibold capitalize ' + (tab === t ? 'bg-brand-500 text-white' : 'bg-black/5')}>{t}</button>
+            ))}
+          </div>
+          {tab === 'orders' && (
+            <section className="space-y-3">
+              <h2 className="font-bold">Orders ({orders?.length ?? 0})</h2>
+              {(orders || []).map((o) => (
+                <div key={o.id} className="space-y-1 rounded-2xl border border-black/10 p-3 text-sm">
+                  <div className="flex justify-between font-semibold"><span>{o.id}</span><span>Rs {o.total.toLocaleString()}</span></div>
+                  <div className="text-black/50">{new Date(o.created_at).toLocaleString()}</div>
+                  <div>{o.name} · <a className="text-brand-600" href={'tel:' + o.phone}>{o.phone}</a> · <a className="text-brand-600" href={wa(o.phone)}>WhatsApp</a></div>
+                  <div>{o.address}, {o.city}</div>
+                  {o.notes && <div className="text-black/60">Note: {o.notes}</div>}
+                  <ul className="list-disc pl-5">{o.items.map((i: P, k: number) => <li key={k}>{i.name} × {i.qty}</li>)}</ul>
+                  <select className={inp} value={o.status} disabled={busy} onChange={(e) => setStatus(o, e.target.value)}>
+                    {['new', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((x) => <option key={x}>{x}</option>)}
+                  </select>
+                </div>
+              ))}
+              {orders && !orders.length && <p className="text-black/50">Abhi koi order nahi.</p>}
+            </section>
+          )}
+          {tab === 'sales' && (
+            <section className="space-y-3">
+              <h2 className="font-bold">Sales (cancelled orders ke baghair)</h2>
+              {([['Aaj', 1], ['Pichle 7 din', 7], ['Pichle 30 din', 30]] as const).map(([l, d]) => (
+                <div key={l} className="flex justify-between rounded-xl border border-black/10 p-3"><span>{l} · {since(d).length} orders</span><b>Rs {sum(since(d)).toLocaleString()}</b></div>
+              ))}
+              <div className="flex justify-between rounded-xl border border-black/10 p-3"><span>Kul · {live.length} orders</span><b>Rs {sum(live).toLocaleString()}</b></div>
+              <h3 className="pt-2 font-semibold">Sab se zyada bikne wale</h3>
+              {Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([n, q]) => <div key={n} className="flex justify-between text-sm"><span>{n}</span><span>{q} pcs</span></div>)}
+            </section>
+          )}
+          {tab === 'products' && (<>
+          <section className="space-y-3 rounded-2xl border border-black/10 p-4">
+            <h2 className="font-bold">Naya product</h2>
+            <input type="file" accept="image/*" multiple onChange={(e) => pick(e.target.files)} />
+            <div className="flex gap-2">{imgs.map((d, i) => <img key={i} src={d} alt="" className="h-20 w-20 rounded-lg object-cover" />)}</div>
+            <select className={inp} value={cat} onChange={(e) => setCat(e.target.value)}>
+              <option value="c-electronics">Electronics</option><option value="c-kids">Kids Items</option>
+            </select>
+            <div className="grid grid-cols-3 gap-2">
+              <input className={inp} inputMode="numeric" placeholder="Qeemat" value={price} onChange={(e) => setPrice(e.target.value)} />
+              <input className={inp} inputMode="numeric" placeholder="Sale (optional)" value={sale} onChange={(e) => setSale(e.target.value)} />
+              <input className={inp} inputMode="numeric" placeholder="Stock" value={stock} onChange={(e) => setStock(e.target.value)} />
+            </div>
+            <button className={btn} disabled={busy || !imgs.length} onClick={generate}>✨ AI se naam aur description banayen</button>
+            <input className={inp} placeholder="Naam" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+            <input className={inp} placeholder="Urdu naam" value={f.nameUr} onChange={(e) => setF({ ...f, nameUr: e.target.value })} />
+            <input className={inp} placeholder="Chhoti description" value={f.shortDescription} onChange={(e) => setF({ ...f, shortDescription: e.target.value })} />
+            <textarea className={inp} rows={4} placeholder="Description" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
+            <textarea className={inp} rows={4} placeholder="Features (har line mein ek)" value={f.highlights} onChange={(e) => setF({ ...f, highlights: e.target.value })} />
+            <button className={btn} disabled={busy} onClick={publish}>Publish</button>
+          </section>
+          <section className="space-y-2">
+            <h2 className="font-bold">Maujooda products ({products.length})</h2>
+            {products.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 rounded-xl border border-black/10 p-2">
+                <img src={p.images[0]} alt="" className="h-14 w-14 rounded-lg object-cover" />
+                <div className="min-w-0 flex-1 text-sm"><div className="truncate font-semibold">{p.name}</div><div>Rs {p.salePrice || p.price} · stock {p.stock}</div></div>
+                <button className="text-sm font-semibold text-brand-600" disabled={busy} onClick={() => edit(p)}>Edit</button>
+                <button className="text-sm font-semibold text-red-600" disabled={busy} onClick={() => del(p)}>Delete</button>
+              </div>
+            ))}
+          </section>
+          </>)}
+        </>
+      )}
+      {msg && <p className="fixed inset-x-4 bottom-4 rounded-xl bg-ink p-3 text-center text-sm text-white">{msg}</p>}
     </div>
   )
 }

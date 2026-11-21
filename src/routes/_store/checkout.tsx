@@ -80,6 +80,7 @@ function Checkout() {
       delivery,
       total,
     })
+    fetch('/api/order', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(order), keepalive: true }).catch(() => {})
     window.open(orderWaLink(order), '_blank')
     clear()
     navigate({ to: '/order/$orderId', params: { orderId: order.id } })
