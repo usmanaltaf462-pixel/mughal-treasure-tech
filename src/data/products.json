@@ -1,27 +1,5 @@
 [
   {
-    "id": "p-1795283117689",
-    "slug": "air-39-crystal-earbuds-7r7d",
-    "name": "Air 39 crystal earbuds ",
-    "nameUr": " ",
-    "categoryId": "c-electronics",
-    "images": [
-      "/img/air-39-crystal-earbuds-7r7d-1.webp",
-      "/img/air-39-crystal-earbuds-7r7d-2.webp"
-    ],
-    "shortDescription": "Best sound quality ",
-    "description": "",
-    "highlights": [],
-    "price": 750,
-    "salePrice": 650,
-    "stock": 20,
-    "rating": 0,
-    "reviews": 0,
-    "featured": true,
-    "isNew": true,
-    "createdAt": "2026-11-21"
-  },
-  {
     "id": "p-2001",
     "slug": "i12-tws-wireless-earbuds",
     "name": "i12 TWS Wireless Earbuds",
