@@ -24,7 +24,8 @@
     "reviews": 0,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-21"
+    "createdAt": "2026-11-21",
+    "hidden": true
   },
   {
     "id": "p-2002",
