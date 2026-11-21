@@ -41,7 +41,7 @@ function CartPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <Link to="/product/$slug" params={{ slug: it.product.slug }} className="font-semibold hover:text-brand-600">{it.product.name}</Link>
-                      <p className="urdu text-xs text-ink/50">{it.product.nameUr}</p>
+                      {it.product.nameUr !== it.product.name && <p className="urdu text-xs text-ink/50">{it.product.nameUr}</p>}
                     </div>
                     <button type="button" onClick={() => remove(it.productId)} className="grid h-9 w-9 place-items-center rounded-full text-ink/30 hover:bg-red-50 hover:text-red-500" aria-label={`Remove ${it.product.name}`}>
                       <Trash2 className="h-4 w-4" />

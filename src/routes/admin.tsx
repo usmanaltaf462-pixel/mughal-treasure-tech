@@ -181,7 +181,7 @@ function Admin() {
             </div>
             <button className={btn} disabled={busy || !imgs.length} onClick={generate}>✨ AI se naam aur description banayen</button>
             <input className={inp} placeholder="Naam" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
-            <input className={inp} placeholder="Urdu naam" value={f.nameUr} onChange={(e) => setF({ ...f, nameUr: e.target.value })} />
+            <input className={inp} placeholder="Urdu naam (khali chhor sakte hain)" value={f.nameUr} onChange={(e) => setF({ ...f, nameUr: e.target.value })} />
             <input className={inp} placeholder="Chhoti description" value={f.shortDescription} onChange={(e) => setF({ ...f, shortDescription: e.target.value })} />
             <textarea className={inp} rows={4} placeholder="Description" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
             <textarea className={inp} rows={4} placeholder="Features (har line mein ek)" value={f.highlights} onChange={(e) => setF({ ...f, highlights: e.target.value })} />

@@ -122,7 +122,8 @@ async function describe(env, dataUrl, hint) {
   }
   return {
     name: String(d.name || ''),
-    nameUr: String(d.nameUr || ''),
+    // The model writes Urdu badly (often Hindi/Punjabi letters), so only keep it if it is really Urdu script.
+    nameUr: /[\u0600-\u06FF]/.test(String(d.nameUr || '')) && !/[\u0900-\u0DFF]/.test(String(d.nameUr)) ? String(d.nameUr) : '',
     shortDescription: String(d.shortDescription || ''),
     description: String(d.description || ''),
     highlights: Array.isArray(d.highlights) ? d.highlights.map(String).slice(0, 5) : [],

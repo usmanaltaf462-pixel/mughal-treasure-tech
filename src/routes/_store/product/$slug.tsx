@@ -37,6 +37,7 @@ function ProductPage() {
   const { add } = useCart()
   const navigate = useNavigate()
   const [qty, setQty] = useState(1)
+  const [active, setActive] = useState(0)
   const soldOut = product.stock <= 0
   const related = products.filter((p) => p.categoryId === product.categoryId && p.id !== product.id).slice(0, 4)
 
@@ -49,20 +50,35 @@ function ProductPage() {
       </nav>
 
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
-        <div className="overflow-hidden rounded-3xl bg-cream">
-          <img
-            src={img(product.images[0], 1000, 1000)}
-            srcSet={`${img(product.images[0], 600, 600)} 600w, ${img(product.images[0], 1000, 1000)} 1000w`}
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            alt={product.name}
-            className="aspect-square w-full object-cover"
-          />
+        <div>
+          <div className="overflow-hidden rounded-3xl bg-cream">
+            <img
+              src={img(product.images[active] || product.images[0], 1000, 1000)}
+              alt={product.name}
+              className="aspect-square w-full object-cover"
+            />
+          </div>
+          {product.images.length > 1 && (
+            <div className="mt-3 flex gap-2 overflow-x-auto">
+              {product.images.map((src: string, i: number) => (
+                <button
+                  key={src}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  aria-label={`Photo ${i + 1}`}
+                  className={'h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-cream ' + (i === active ? 'border-brand-500' : 'border-transparent')}
+                >
+                  <img src={img(src, 200, 200)} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col pb-24 lg:pb-0">
           <p className="text-xs font-bold uppercase tracking-wider text-brand-600">{category?.name}</p>
           <h1 className="mt-2 font-display text-3xl font-bold leading-tight sm:text-4xl">{product.name}</h1>
-          <p className="urdu text-lg text-ink/60">{product.nameUr}</p>
+          {product.nameUr !== product.name && <p className="urdu text-lg text-ink/60">{product.nameUr}</p>}
           {product.reviews > 0 && (
           <div className="mt-2 flex items-center gap-2 text-sm">
             <span className="flex items-center gap-0.5">

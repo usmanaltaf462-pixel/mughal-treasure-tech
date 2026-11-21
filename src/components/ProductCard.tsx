@@ -43,7 +43,7 @@ export function ProductCard({ product }: { product: Product }) {
         <Link to="/product/$slug" params={{ slug: product.slug }} className="line-clamp-2 text-sm font-semibold leading-snug text-ink hover:text-brand-600 sm:text-[15px]">
           {product.name}
         </Link>
-        <p className="urdu text-xs text-ink/50">{product.nameUr}</p>
+        {product.nameUr !== product.name && <p className="urdu text-xs text-ink/50">{product.nameUr}</p>}
         <div className="mt-auto flex items-end justify-between gap-2 pt-1">
           <Price product={product} />
           <button
