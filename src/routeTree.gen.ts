@@ -19,6 +19,7 @@ import { Route as StoreContactRouteImport } from './routes/_store/contact'
 import { Route as StorePrivacyRouteImport } from './routes/_store/privacy'
 import { Route as StoreShippingReturnsRouteImport } from './routes/_store/shipping-returns'
 import { Route as StoreShopRouteImport } from './routes/_store/shop'
+import { Route as StoreTrackRouteImport } from './routes/_store/track'
 import { Route as StoreOrderOrderIdRouteImport } from './routes/_store/order/$orderId'
 import { Route as StoreProductSlugRouteImport } from './routes/_store/product/$slug'
 
@@ -71,6 +72,11 @@ const StoreShopRoute = StoreShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => StoreRoute,
 } as any)
+const StoreTrackRoute = StoreTrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => StoreRoute,
+} as any)
 const StoreOrderOrderIdRoute = StoreOrderOrderIdRouteImport.update({
   id: '/order/$orderId',
   path: '/order/$orderId',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof StorePrivacyRoute
   '/shipping-returns': typeof StoreShippingReturnsRoute
   '/shop': typeof StoreShopRoute
+  '/track': typeof StoreTrackRoute
   '/order/$orderId': typeof StoreOrderOrderIdRoute
   '/product/$slug': typeof StoreProductSlugRoute
 }
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof StorePrivacyRoute
   '/shipping-returns': typeof StoreShippingReturnsRoute
   '/shop': typeof StoreShopRoute
+  '/track': typeof StoreTrackRoute
   '/': typeof StoreIndexRoute
   '/order/$orderId': typeof StoreOrderOrderIdRoute
   '/product/$slug': typeof StoreProductSlugRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/_store/privacy': typeof StorePrivacyRoute
   '/_store/shipping-returns': typeof StoreShippingReturnsRoute
   '/_store/shop': typeof StoreShopRoute
+  '/_store/track': typeof StoreTrackRoute
   '/_store/': typeof StoreIndexRoute
   '/_store/order/$orderId': typeof StoreOrderOrderIdRoute
   '/_store/product/$slug': typeof StoreProductSlugRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/shipping-returns'
     | '/shop'
+    | '/track'
     | '/order/$orderId'
     | '/product/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/shipping-returns'
     | '/shop'
+    | '/track'
     | '/'
     | '/order/$orderId'
     | '/product/$slug'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/_store/privacy'
     | '/_store/shipping-returns'
     | '/_store/shop'
+    | '/_store/track'
     | '/_store/'
     | '/_store/order/$orderId'
     | '/_store/product/$slug'
@@ -243,6 +255,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreShopRouteImport
       parentRoute: typeof StoreRoute
     }
+    '/_store/track': {
+      id: '/_store/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof StoreTrackRouteImport
+      parentRoute: typeof StoreRoute
+    }
     '/_store/order/$orderId': {
       id: '/_store/order/$orderId'
       path: '/order/$orderId'
@@ -268,6 +287,7 @@ interface StoreRouteChildren {
   StorePrivacyRoute: typeof StorePrivacyRoute
   StoreShippingReturnsRoute: typeof StoreShippingReturnsRoute
   StoreShopRoute: typeof StoreShopRoute
+  StoreTrackRoute: typeof StoreTrackRoute
   StoreIndexRoute: typeof StoreIndexRoute
   StoreOrderOrderIdRoute: typeof StoreOrderOrderIdRoute
   StoreProductSlugRoute: typeof StoreProductSlugRoute
@@ -281,6 +301,7 @@ const StoreRouteChildren: StoreRouteChildren = {
   StorePrivacyRoute: StorePrivacyRoute,
   StoreShippingReturnsRoute: StoreShippingReturnsRoute,
   StoreShopRoute: StoreShopRoute,
+  StoreTrackRoute: StoreTrackRoute,
   StoreIndexRoute: StoreIndexRoute,
   StoreOrderOrderIdRoute: StoreOrderOrderIdRoute,
   StoreProductSlugRoute: StoreProductSlugRoute,

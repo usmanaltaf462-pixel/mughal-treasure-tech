@@ -43,6 +43,7 @@ function OrderConfirmation() {
           Your order <b className="text-ink">{order.id}</b> has been placed. Our team will call you on <b className="text-ink">{order.customer.phone}</b> to confirm.
         </p>
         <a href={orderWaLink(order)} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 font-semibold text-white">Send order on WhatsApp</a>
+        <div className="mt-3"><Link to="/track" search={{ id: order.id }} className="font-semibold text-brand-600 underline">Track your order</Link></div>
       </div>
 
       <div className="mt-10 rounded-3xl border border-ink/5 bg-white p-5 sm:p-6">

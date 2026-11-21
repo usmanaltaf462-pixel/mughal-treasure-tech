@@ -56,11 +56,22 @@ function Admin() {
   })
   const loadOrders = () => run('Orders load ho rahe hain…', async () => { setOrders(await api('/api/orders')); setMsg('') })
   const go = (t: 'products' | 'orders' | 'sales') => { setTab(t); if (t !== 'products') loadOrders() }
-  const setStatus = (o: P, status: string) => run('Status update ho raha hai…', async () => {
-    await api('/api/order-status', { id: o.id, status })
-    setOrders((orders || []).map((x) => (x.id === o.id ? { ...x, status } : x))); setMsg('✅ Update ho gaya')
+  const setStatus = (o: P, status: string, tracking?: string) => run('Status update ho raha hai…', async () => {
+    await api('/api/order-status', { id: o.id, status, tracking })
+    setOrders((orders || []).map((x) => (x.id === o.id ? { ...x, status, tracking: tracking ?? x.tracking } : x))); setMsg('✅ Update ho gaya')
   })
   const wa = (ph: string) => 'https://wa.me/' + ph.replace(/\D/g, '').replace(/^0/, '92')
+  const msgFor = (o: P) => {
+    const m: Record<string, string> = {
+      new: `Assalam o Alaikum ${o.name}, aap ka order ${o.id} hamein mil gaya hai. Shukriya!`,
+      confirmed: `Assalam o Alaikum ${o.name}, aap ka order ${o.id} confirm ho gaya hai.`,
+      packed: `Assalam o Alaikum ${o.name}, aap ka order ${o.id} pack ho gaya hai aur jald dispatch hoga.`,
+      dispatched: `Assalam o Alaikum ${o.name}, aap ka order ${o.id} PostEx se dispatch ho gaya hai.${o.tracking ? ' Tracking number: ' + o.tracking + '.' : ''}`,
+      delivered: `Assalam o Alaikum ${o.name}, aap ka order ${o.id} deliver ho gaya hai. Shukriya, Mughal Treasure Tech ko chunne ka!`,
+      cancelled: `Assalam o Alaikum ${o.name}, aap ka order ${o.id} cancel ho gaya hai.`,
+    }
+    return `${m[o.status] || ''}\nOrder track karein: ${location.origin}/track?id=${o.id}`
+  }
   const live = (orders || []).filter((o) => o.status !== 'cancelled')
   const since = (d: number) => live.filter((o) => Date.now() - new Date(o.created_at).getTime() < d * 864e5)
   const sum = (l: P[]) => l.reduce((a, o) => a + o.total, 0)
@@ -134,8 +145,10 @@ function Admin() {
                   {o.notes && <div className="text-black/60">Note: {o.notes}</div>}
                   <ul className="list-disc pl-5">{o.items.map((i: P, k: number) => <li key={k}>{i.name} × {i.qty}</li>)}</ul>
                   <select className={inp} value={o.status} disabled={busy} onChange={(e) => setStatus(o, e.target.value)}>
-                    {['new', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((x) => <option key={x}>{x}</option>)}
+                    {['new', 'confirmed', 'packed', 'dispatched', 'delivered', 'cancelled'].map((x) => <option key={x}>{x}</option>)}
                   </select>
+                  <input className={inp} placeholder="PostEx tracking number" defaultValue={o.tracking || ''} onBlur={(e) => e.target.value.trim() !== (o.tracking || '') && setStatus(o, o.status, e.target.value.trim())} />
+                  <a className="block rounded-full bg-[#25D366] px-4 py-2.5 text-center font-semibold text-white" target="_blank" rel="noreferrer" href={wa(o.phone) + '?text=' + encodeURIComponent(msgFor(o))}>Customer ko WhatsApp bhejein</a>
                 </div>
               ))}
               {orders && !orders.length && <p className="text-black/50">Abhi koi order nahi.</p>}

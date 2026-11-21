@@ -40,14 +40,22 @@ async function getProducts(env) {
 
 
 const SCHEMA = `CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new', name TEXT, phone TEXT, city TEXT, address TEXT, notes TEXT, items TEXT, subtotal INTEGER, delivery INTEGER, total INTEGER)`
-const STATUSES = ['new', 'confirmed', 'shipped', 'delivered', 'cancelled']
+const STATUSES = ['new', 'confirmed', 'packed', 'dispatched', 'delivered', 'cancelled']
+let ready = false
+async function ensure(env) {
+  if (ready) return
+  await env.DB.prepare(SCHEMA).run()
+  try { await env.DB.prepare('ALTER TABLE orders ADD COLUMN tracking TEXT').run() } catch (e) { /* column already exists */ }
+  ready = true
+}
+const digits = (v) => String(v || '').replace(/\D/g, '').slice(-10)
 const str = (v, n) => String(v == null ? '' : v).slice(0, n)
 const num = (v) => (Number.isFinite(Number(v)) ? Math.max(0, Math.round(Number(v))) : 0)
 
 async function saveOrder(env, o) {
   const c = (o && o.customer) || {}
   if (!o || !o.id || !c.name || !c.phone || !Array.isArray(o.items) || !o.items.length || o.items.length > 40) throw new Error('Bad order')
-  await env.DB.prepare(SCHEMA).run()
+  await ensure(env)
   const items = o.items.map((i) => ({ name: str(i.name, 120), qty: num(i.qty), unitPrice: num(i.unitPrice), productId: str(i.productId, 40) }))
   await env.DB.prepare('INSERT OR IGNORE INTO orders (id, created_at, status, name, phone, city, address, notes, items, subtotal, delivery, total) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
     .bind(str(o.id, 40), new Date().toISOString(), 'new', str(c.name, 80), str(c.phone, 30), str(c.city, 60), str(c.address, 300), str(c.notes, 300), JSON.stringify(items), num(o.subtotal), num(o.delivery), num(o.total)).run()
@@ -128,6 +136,19 @@ export default {
     if (url.pathname === '/api/order' && req.method === 'POST') {
       try { await saveOrder(env, await req.json()); return json({ ok: true }) } catch (e) { return json({ error: String(e && e.message ? e.message : e) }, 400) }
     }
+    if (url.pathname === '/api/track' && req.method === 'POST') {
+      try {
+        const { id, phone } = await req.json()
+        await ensure(env)
+        const r = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(str(id, 40).trim()).first()
+        if (!r || digits(r.phone) !== digits(phone) || digits(phone).length < 10) {
+          await new Promise((res) => setTimeout(res, 600))
+          return json({ error: 'Order nahi mila. Order ID aur phone number dobara check karein.' }, 404)
+        }
+        const items = JSON.parse(r.items || '[]').map((i) => ({ name: i.name, qty: i.qty }))
+        return json({ id: r.id, status: r.status === 'shipped' ? 'dispatched' : r.status, created_at: r.created_at, total: r.total, items, tracking: r.tracking || '', courier: 'PostEx' })
+      } catch (e) { return json({ error: 'Kuch masla aa gaya, dobara try karein.' }, 400) }
+    }
     if (!env.ADMIN_PASSWORD || !env.GITHUB_TOKEN) return json({ error: 'Server is not set up yet (missing secrets).' }, 500)
     if (!same(req.headers.get('x-admin-key') || '', env.ADMIN_PASSWORD)) {
       await new Promise((r) => setTimeout(r, 800))
@@ -136,14 +157,15 @@ export default {
     try {
       if (url.pathname === '/api/products' && req.method === 'GET') return json(await getProducts(env))
       if (url.pathname === '/api/orders' && req.method === 'GET') {
-        await env.DB.prepare(SCHEMA).run()
+        await ensure(env)
         const { results } = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC LIMIT 500').all()
-        return json(results.map((r) => ({ ...r, items: JSON.parse(r.items || '[]') })))
+        return json(results.map((r) => ({ ...r, status: r.status === 'shipped' ? 'dispatched' : r.status, items: JSON.parse(r.items || '[]') })))
       }
       if (url.pathname === '/api/order-status' && req.method === 'POST') {
-        const { id, status } = await req.json()
+        const { id, status, tracking } = await req.json()
         if (!STATUSES.includes(status)) return json({ error: 'Bad status' }, 400)
-        await env.DB.prepare('UPDATE orders SET status = ? WHERE id = ?').bind(status, str(id, 40)).run()
+        await ensure(env)
+        await env.DB.prepare('UPDATE orders SET status = ?, tracking = COALESCE(?, tracking) WHERE id = ?').bind(status, typeof tracking === 'string' ? str(tracking, 60) : null, str(id, 40)).run()
         return json({ ok: true })
       }
       if (url.pathname === '/api/describe' && req.method === 'POST') {
