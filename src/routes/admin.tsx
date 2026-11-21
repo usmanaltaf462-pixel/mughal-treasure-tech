@@ -109,6 +109,7 @@ function Admin() {
     })
   }
   const del = (p: P) => confirm(`"${p.name}" delete karein?`) && commit((products || []).filter((x) => x.id !== p.id), {}, 'Delete ho gaya (1-2 minute mein site se hat jayega).')
+  const toggleHide = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, hidden: !x.hidden } : x)), {}, p.hidden ? 'Product dobara dikhne laga (1-2 minute mein).' : 'Product hide ho gaya (1-2 minute mein store se hat jayega).')
   const edit = (p: P) => {
     const np = prompt(`${p.name}\nNayi qeemat:`, String(p.price)); if (np === null) return
     const ns = prompt('Sale price (khali = koi nahi):', p.salePrice ? String(p.salePrice) : ''); if (ns === null) return
@@ -189,10 +190,11 @@ function Admin() {
           <section className="space-y-2">
             <h2 className="font-bold">Maujooda products ({products.length})</h2>
             {products.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 rounded-xl border border-black/10 p-2">
+              <div key={p.id} className={'flex items-center gap-3 rounded-xl border border-black/10 p-2 ' + (p.hidden ? 'opacity-50' : '')}>
                 <img src={p.images[0]} alt="" className="h-14 w-14 rounded-lg object-cover" />
-                <div className="min-w-0 flex-1 text-sm"><div className="truncate font-semibold">{p.name}</div><div>Rs {p.salePrice || p.price} · stock {p.stock}</div></div>
+                <div className="min-w-0 flex-1 text-sm"><div className="truncate font-semibold">{p.name}</div><div>Rs {p.salePrice || p.price} · stock {p.stock}{p.hidden ? ' · HIDDEN' : ''}</div></div>
                 <button className="text-sm font-semibold text-brand-600" disabled={busy} onClick={() => edit(p)}>Edit</button>
+                <button className="text-sm font-semibold text-black/60" disabled={busy} onClick={() => toggleHide(p)}>{p.hidden ? 'Show' : 'Hide'}</button>
                 <button className="text-sm font-semibold text-red-600" disabled={busy} onClick={() => del(p)}>Delete</button>
               </div>
             ))}

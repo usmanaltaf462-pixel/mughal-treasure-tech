@@ -36,6 +36,7 @@ export interface Product {
   reviews: number
   featured?: boolean
   isNew?: boolean
+  hidden?: boolean
   createdAt: string
 }
 
@@ -45,7 +46,9 @@ export const categories: Array<Category> = [
 ]
 
 // Products live in products.json (managed from the /admin page).
-export const products: Array<Product> = productData as Array<Product>
+const allProducts = productData as Array<Product>
+// Hidden products are not shown in the store (shop, search, home).
+export const products: Array<Product> = allProducts.filter((p) => !p.hidden)
 
 export const DELIVERY_FEE = 250
 export const FREE_DELIVERY_THRESHOLD = 5000
@@ -65,7 +68,8 @@ export function getProductBySlug(slug: string) {
   return products.find((p) => p.slug === slug)
 }
 export function getProduct(id: string) {
-  return products.find((p) => p.id === id)
+  // Includes hidden products so existing carts and orders keep working.
+  return allProducts.find((p) => p.id === id)
 }
 export function effectivePrice(p: Pick<Product, 'price' | 'salePrice'>) {
   return p.salePrice && p.salePrice < p.price ? p.salePrice : p.price
