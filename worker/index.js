@@ -100,11 +100,18 @@ async function describe(env, dataUrl, hint) {
     await env.AI.run(MODEL, { prompt: 'agree' })
     out = await runModel(env, dataUrl, hint)
   }
-  const text = typeof out === 'string' ? out : out.response || ''
-  const a = text.indexOf('{')
-  const b = text.lastIndexOf('}')
-  if (a < 0 || b < a) throw new Error('AI did not return a listing')
-  const d = JSON.parse(text.slice(a, b + 1))
+  // Workers AI sometimes returns the reply as an already-parsed object instead of a string.
+  const raw = typeof out === 'string' ? out : out && out.response
+  let d
+  if (raw && typeof raw === 'object') {
+    d = raw
+  } else {
+    const text = String(raw || '')
+    const a = text.indexOf('{')
+    const b = text.lastIndexOf('}')
+    if (a < 0 || b < a) throw new Error('AI did not return a listing')
+    d = JSON.parse(text.slice(a, b + 1))
+  }
   return {
     name: String(d.name || ''),
     nameUr: String(d.nameUr || ''),
