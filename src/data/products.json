@@ -171,7 +171,7 @@
     "nameUr": "20 واٹ فاسٹ چارجر",
     "categoryId": "c-electronics",
     "images": [
-      "/img/charger.webp"
+      "/img/charger-1.webp"
     ],
     "shortDescription": "Compact fast charger for phones, with short-circuit protection.",
     "description": "Compact fast charger for phones, with short-circuit protection. Sample listing — replace with your real product details.",
@@ -247,7 +247,7 @@
     "nameUr": "ٹائپ سی کیبل",
     "categoryId": "c-electronics",
     "images": [
-      "/img/cable.webp"
+      "/img/cable-1.webp"
     ],
     "shortDescription": "Durable braided Type-C cable for fast charging and data.",
     "description": "Durable braided Type-C cable for fast charging and data. Sample listing — replace with your real product details.",
@@ -298,7 +298,8 @@
     "nameUr": "ریموٹ کنٹرول کار",
     "categoryId": "c-kids",
     "images": [
-      "/img/kids-rc-car.webp"
+      "/img/rc-car-1.webp",
+      "/img/rc-car-2.webp"
     ],
     "shortDescription": "Fast rechargeable remote control car with lights.",
     "description": "Fast rechargeable remote control car with lights. Sample listing — replace with your real product details.",
@@ -350,14 +351,15 @@
     "nameUr": "بچوں کی پانی کی بوتل",
     "categoryId": "c-kids",
     "images": [
-      "/img/kids-bottle.webp"
+      "/img/bottle-1.webp"
     ],
-    "shortDescription": "Leak-proof bottle for school, with a handy carry strap.",
-    "description": "Leak-proof bottle for school, with a handy carry strap. Sample listing — replace with your real product details.",
+    "shortDescription": "Kids water bottle with a cartoon print, flip-up lid and carry strap.",
+    "description": "A fun kids water bottle with a cartoon print, a flip-up drinking lid and an adjustable carry strap, easy for school. Sample listing — replace with your real product details.",
     "highlights": [
-      "Leak-proof",
-      "BPA free",
-      "Carry strap"
+      "Cartoon character prints",
+      "Flip-up drinking lid",
+      "Carry strap included",
+      "Easy to carry to school"
     ],
     "price": 899,
     "salePrice": 649,
