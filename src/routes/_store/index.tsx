@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, Banknote, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { ProductCard } from '@/components/ProductCard'
 import { Perks } from '@/components/Footer'
@@ -138,16 +138,9 @@ function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4">
-        <div className="flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed border-brand-200 bg-cream p-8 text-center sm:flex-row sm:text-left">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-500 text-white">
-            <Banknote className="h-7 w-7" />
-          </span>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold">Pay only when your order arrives</h3>
-            <p className="text-sm text-ink/60">Cash on Delivery across Karachi, Lahore, Islamabad and 100+ cities. No card needed.</p>
-          </div>
-          <p className="urdu text-lg text-brand-700">ڈیلیوری پر نقد ادائیگی</p>
-        </div>
+        <Link to="/shop" className="block overflow-hidden rounded-3xl shadow-lg shadow-black/10">
+          <img src={img('/img/cod-section.webp', 1400)} alt="Pay only when your order arrives. Cash on Delivery across Karachi, Lahore, Islamabad and 100+ cities. No card needed." loading="lazy" className="h-auto w-full" />
+        </Link>
       </section>
     </div>
   )

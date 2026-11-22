@@ -44,8 +44,8 @@ export function Perks() {
 export function Footer() {
   return (
     <footer
-      className="mt-20 bg-ink text-white/75"
-      style={{ backgroundImage: "linear-gradient(rgba(0,0,0,.3), rgba(0,0,0,.45)), url('/img/footer-bg.webp')", backgroundSize: 'cover', backgroundPosition: 'center bottom' }}
+      className="mt-20 bg-[length:100%_auto] bg-bottom bg-no-repeat text-white/80 sm:bg-cover"
+      style={{ backgroundColor: '#0c0a09', backgroundImage: "url('/img/footer-bg.webp')" }}
     >
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4">
