@@ -193,18 +193,18 @@
   {
     "id": "p-1004",
     "slug": "power-bank-10000",
-    "name": "Power Bank 10000mAh",
-    "nameUr": "پاور بینک 10000mAh",
+    "name": "Power Bank",
+    "nameUr": "پاور بینک",
     "categoryId": "c-electronics",
     "images": [
-      "/img/powerbank.webp"
+      "/img/powerbank-1.webp"
     ],
-    "shortDescription": "Slim 10000mAh power bank with dual USB output.",
-    "description": "Slim 10000mAh power bank with dual USB output. Sample listing — replace with your real product details.",
+    "shortDescription": "Power bank with an LED display, dual USB-A and a USB-C port, with a charging cable.",
+    "description": "A power bank with an LED digital display that shows the remaining charge, two USB-A ports and one USB-C port, and a USB to Type-C cable in the box. Sample listing — replace with your real product details (capacity, price).",
     "highlights": [
-      "10000mAh",
-      "Dual USB output",
-      "LED indicator"
+      "LED digital display",
+      "Dual USB-A + USB-C ports",
+      "USB to Type-C cable included"
     ],
     "price": 3299,
     "salePrice": 2599,

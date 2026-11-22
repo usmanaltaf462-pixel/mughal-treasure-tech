@@ -84,13 +84,13 @@ function Home() {
 
       <section className="mx-auto max-w-7xl px-4">
         <SectionTitle title="Shop by Category" ur="زمرہ کے مطابق خریداری" to={<Link to="/shop" className="text-sm font-semibold text-brand-600 hover:underline">View all</Link>} />
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:grid-cols-6">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 sm:gap-5">
           {categories.map((c) => (
             <Link key={c.id} to="/shop" search={{ category: c.slug }} className="group text-center">
-              <div className="aspect-square overflow-hidden rounded-2xl bg-brand-50 ring-1 ring-ink/5 transition group-hover:ring-2 group-hover:ring-brand-400">
+              <div className="aspect-[16/9] overflow-hidden rounded-2xl bg-brand-50 ring-1 ring-ink/5 transition group-hover:ring-2 group-hover:ring-brand-400">
                 <img src={img(c.image, 320, 320)} alt="" loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
               </div>
-              <p className="mt-2 text-xs font-semibold sm:text-sm">{c.name}</p>
+              <p className="mt-2 text-sm font-semibold sm:text-base">{c.name}</p>
               <p className="urdu text-[11px] text-ink/50">{c.nameUr}</p>
             </Link>
           ))}
