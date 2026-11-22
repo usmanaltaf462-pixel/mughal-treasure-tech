@@ -18,50 +18,12 @@ const banners = [
   { image: '/img/banner-cod.webp', alt: 'Cash on Delivery across Pakistan, free delivery over Rs 5,000', search: {} },
 ]
 
-const AR = "'Amiri','Noto Naskh Arabic','Traditional Arabic',serif"
-
-function BismillahSlide() {
-  return (
-    <div className="absolute inset-0 overflow-hidden" style={{ containerType: 'inline-size', background: 'linear-gradient(135deg,#052e2b 0%,#0b5d4b 55%,#0f766e 100%)' }}>
-      <div className="absolute inset-0" style={{ opacity: 0.08, backgroundImage: 'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)', backgroundSize: '22px 22px' }} />
-      <div className="absolute" style={{ inset: '2.2cqw', borderRadius: '2.4cqw', border: '1px solid rgba(250,204,21,.5)' }} />
-      <div className="relative flex h-full flex-col items-center justify-center text-center" style={{ padding: '3cqw 8cqw 5cqw', gap: '0.6cqw' }}>
-        <p dir="rtl" style={{ fontFamily: AR, fontSize: '6.6cqw', lineHeight: 1.5, color: '#facc15', fontWeight: 700 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
-        <div style={{ width: '14cqw', height: '2px', background: 'rgba(250,204,21,.6)', margin: '0.4cqw 0' }} />
-        <p dir="rtl" style={{ fontFamily: AR, fontSize: '3.5cqw', lineHeight: 1.8, color: '#ffffff' }}>﴿ وَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا ۚ وَاتَّقُوا اللَّهَ الَّذِي أَنتُم بِهِ مُؤْمِنُونَ ﴾</p>
-        <p className="urdu" style={{ fontSize: '2.5cqw', lineHeight: 1.9, color: '#d1fae5' }}>اور جو حلال اور پاکیزہ رزق اللہ نے تمہیں دیا ہے اس میں سے کھاؤ، اور اس اللہ سے ڈرتے رہو جس پر تم ایمان رکھتے ہو۔</p>
-        <p className="urdu" style={{ fontSize: '1.9cqw', lineHeight: 1.8, color: '#facc15' }}>سورۃ المائدہ، آیت 88</p>
-      </div>
-    </div>
-  )
-}
-
-function DuaSlide() {
-  return (
-    <div className="absolute inset-0 overflow-hidden" style={{ containerType: 'inline-size', background: 'linear-gradient(135deg,#0a1a3a 0%,#123a6b 55%,#1a5a8a 100%)' }}>
-      <div className="absolute inset-0" style={{ opacity: 0.08, backgroundImage: 'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)', backgroundSize: '22px 22px' }} />
-      <div className="absolute" style={{ inset: '2.2cqw', borderRadius: '2.4cqw', border: '1px solid rgba(250,204,21,.5)' }} />
-      <div className="relative flex h-full flex-col items-center justify-center text-center" style={{ padding: '3cqw 8cqw 5cqw', gap: '0.6cqw' }}>
-        <p className="urdu" style={{ fontSize: '3cqw', lineHeight: 1.8, color: '#facc15', fontWeight: 600 }}>حلال و طیب رزق کی دعا</p>
-        <div style={{ width: '14cqw', height: '2px', background: 'rgba(250,204,21,.6)', margin: '0.3cqw 0' }} />
-        <p dir="rtl" style={{ fontFamily: AR, fontSize: '4.6cqw', lineHeight: 1.7, color: '#ffffff', fontWeight: 700 }}>اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ</p>
-        <p className="urdu" style={{ fontSize: '2.5cqw', lineHeight: 1.9, color: '#dbeafe' }}>اے اللہ! اپنے حلال کے ذریعے مجھے حرام سے بچا کر کافی ہو جا، اور اپنے فضل سے مجھے اپنے سوا سب سے بے نیاز کر دے۔</p>
-        <p className="urdu" style={{ fontSize: '1.9cqw', lineHeight: 1.8, color: '#facc15' }}>جامع ترمذی: 3563</p>
-      </div>
-    </div>
-  )
-}
-
-const slides: Array<{ image: string; alt: string; search: { category?: string; sale?: boolean }; text?: 'bismillah' | 'dua' }> = [
-  { image: 'bismillah', alt: 'Bismillah ir-Rahman ir-Rahim, and Quran 5:88 about halal and pure sustenance', search: {}, text: 'bismillah' },
-  { image: 'dua', alt: 'Dua for halal and pure sustenance, Jami at-Tirmidhi 3563', search: {}, text: 'dua' },
-  ...banners,
-]
+const slides = banners
 
 function Hero() {
   const [i, setI] = useState(0)
   useEffect(() => {
-    const t = setTimeout(() => setI((n) => (n + 1) % slides.length), i <= 1 ? 9000 : 5000)
+    const t = setTimeout(() => setI((n) => (n + 1) % slides.length), 5000)
     return () => clearTimeout(t)
   }, [i])
   const go = (d: number) => setI((n) => (n + d + slides.length) % slides.length)
@@ -71,24 +33,18 @@ function Hero() {
       <h1 className="sr-only">Mughal Treasure Tech — Electronics and Kids Items in Pakistan</h1>
       <div className="relative overflow-hidden rounded-3xl bg-cream">
         <div className="relative aspect-[2/1]">
-          {slides.map((b, idx) =>
-            b.text ? (
-              <div key={b.image} className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`} aria-hidden={idx !== i}>
-                {b.text === 'dua' ? <DuaSlide /> : <BismillahSlide />}
-              </div>
-            ) : (
-              <Link
-                key={b.image}
-                to="/shop"
-                search={b.search}
-                className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
-                aria-hidden={idx !== i}
-                tabIndex={idx === i ? 0 : -1}
-              >
-                <img src={img(b.image, 1600)} alt={b.alt} className="h-full w-full object-cover" fetchPriority={idx === 2 ? 'high' : 'auto'} />
-              </Link>
-            ),
-          )}
+          {slides.map((b, idx) => (
+            <Link
+              key={b.image}
+              to="/shop"
+              search={b.search}
+              className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+              aria-hidden={idx !== i}
+              tabIndex={idx === i ? 0 : -1}
+            >
+              <img src={img(b.image, 1600)} alt={b.alt} className="h-full w-full object-cover" fetchPriority={idx === 0 ? 'high' : 'auto'} />
+            </Link>
+          ))}
         </div>
         <button type="button" onClick={() => go(-1)} className="absolute left-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-black/25 text-white backdrop-blur hover:bg-black/40" aria-label="Previous banner">
           <ChevronLeft className="h-5 w-5" />
