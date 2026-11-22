@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Menu, Phone, Search, ShoppingBag, Truck, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { categories } from '@/data/catalog'
 import { useCart } from '@/lib/cart'
 import { SITE, waLink } from '@/lib/site'
@@ -8,19 +8,25 @@ import { Logo } from './Logo'
 
 const TOP_AR = "'Amiri','Noto Naskh Arabic','Traditional Arabic',serif"
 function TopMessage() {
-  const [n, setN] = useState(0)
-  useEffect(() => {
-    const t = setInterval(() => setN((x) => (x + 1) % 4), 4500)
-    return () => clearInterval(t)
-  }, [])
-  const box = 'flex min-h-[22px] flex-1 items-center justify-center gap-1.5 text-center leading-tight sm:justify-start sm:text-left'
-  if (n === 0) return <span className={box} dir="rtl" style={{ fontFamily: TOP_AR, fontSize: '17px', fontWeight: 700 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
-  if (n === 1) return <span className={box} dir="rtl" style={{ fontFamily: TOP_AR, fontSize: '16px' }}>﴿ وَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا ﴾ — المائدہ: 88</span>
-  if (n === 2) return <span className={`${box} urdu`} dir="rtl" style={{ fontSize: '13px', lineHeight: 1.7 }}>اور جو حلال اور پاکیزہ رزق اللہ نے تمہیں دیا ہے اس میں سے کھاؤ</span>
+  // One continuous ticker: Bismillah -> ayat -> Urdu translation -> delivery offer, then it loops.
+  const dot = <span aria-hidden className="text-amber-200">✦</span>
+  const items = [
+    <span key="b" dir="rtl" style={{ fontFamily: TOP_AR, fontSize: '18px', fontWeight: 700 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>,
+    <span key="a" dir="rtl" style={{ fontFamily: TOP_AR, fontSize: '17px' }}>﴿ وَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا ۚ وَاتَّقُوا اللَّهَ الَّذِي أَنتُم بِهِ مُؤْمِنُونَ ﴾ — المائدہ: 88</span>,
+    <span key="u" className="urdu" dir="rtl" style={{ fontSize: '14px', lineHeight: 1.8 }}>اور جو حلال اور پاکیزہ رزق اللہ نے تمہیں دیا ہے اس میں سے کھاؤ، اور اس اللہ سے ڈرتے رہو جس پر تم ایمان رکھتے ہو۔</span>,
+    <span key="o" className="flex items-center gap-1.5"><Truck className="h-3.5 w-3.5 shrink-0" /> Cash on Delivery all over Pakistan · Free delivery over Rs 5,000</span>,
+  ]
+  const track = (
+    <div className="flex shrink-0 items-center gap-8 pr-8">
+      {items.map((it, i) => (
+        <span key={i} className="flex items-center gap-8 whitespace-nowrap">{it}{dot}</span>
+      ))}
+    </div>
+  )
   return (
-    <span className={box}>
-      <Truck className="h-3.5 w-3.5 shrink-0" /> Cash on Delivery all over Pakistan · Free delivery over Rs 5,000
-    </span>
+    <div className="relative min-w-0 flex-1 overflow-hidden" aria-label="Bismillah, Quran 5:88 and delivery offer">
+      <div className="mt-marquee flex w-max items-center">{track}{track}</div>
+    </div>
   )
 }
 
