@@ -11,81 +11,49 @@ export const Route = createFileRoute('/_store/')({
 })
 
 const banners = [
-  {
-    image: '/img/hero-main.webp',
-    eyebrow: 'New Arrivals',
-    title: 'Smart tech for everyday life',
-    titleUr: 'روزمرہ کے لیے سمارٹ ٹیک',
-    text: 'Earbuds, neckbands, chargers and smart watches — delivered with Cash on Delivery.',
-    cta: { label: 'Shop electronics', search: { category: 'electronics' } },
-  },
-  {
-    image: '/img/hero-eid.webp',
-    eyebrow: 'Special Deals',
-    title: 'Great prices, genuine products',
-    titleUr: 'خصوصی رعایت',
-    text: 'Pick up your favourites at prices made for everyone.',
-    cta: { label: 'Shop the sale', search: { sale: true } },
-  },
-  {
-    image: '/img/hero-home.webp',
-    eyebrow: 'Kids Items',
-    title: 'Fun picks for little ones',
-    titleUr: 'بچوں کے لیے',
-    text: 'Toys, school bags and bottles that kids love and parents trust.',
-    cta: { label: 'Explore kids items', search: { category: 'kids' } },
-  },
+  { image: '/img/banner-home.webp', alt: 'Mughal Treasure Tech — tech and toys, Cash on Delivery', search: {} },
+  { image: '/img/banner-earbuds.webp', alt: 'Wireless earbuds, gaming earbuds, neckbands and smart watches', search: { category: 'electronics' } },
+  { image: '/img/banner-kids.webp', alt: 'Kids toys — educational toys, remote control toys, school bags and bottles', search: { category: 'kids' } },
+  { image: '/img/banner-accessories.webp', alt: 'Smart gadgets — smart watches, neckbands, wireless earbuds, chargers and power banks', search: { category: 'electronics' } },
+  { image: '/img/banner-cod.webp', alt: 'Cash on Delivery across Pakistan, free delivery over Rs 5,000', search: {} },
 ]
 
 function Hero() {
   const [i, setI] = useState(0)
   useEffect(() => {
-    const t = setInterval(() => setI((n) => (n + 1) % banners.length), 6000)
+    const t = setInterval(() => setI((n) => (n + 1) % banners.length), 5000)
     return () => clearInterval(t)
   }, [])
   const go = (d: number) => setI((n) => (n + d + banners.length) % banners.length)
 
   return (
     <section className="mx-auto max-w-7xl px-4 pt-4 md:pt-6">
-      <div className="relative overflow-hidden rounded-3xl bg-ink">
-        <div className="relative aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9]">
+      <h1 className="sr-only">Mughal Treasure Tech — Electronics and Kids Items in Pakistan</h1>
+      <div className="relative overflow-hidden rounded-3xl bg-cream">
+        <div className="relative aspect-[2/1]">
           {banners.map((b, idx) => (
-            <div key={b.image} className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`} aria-hidden={idx !== i}>
-              <img
-                src={img(b.image, 1600)}
-                srcSet={`${img(b.image, 800)} 800w, ${img(b.image, 1600)} 1600w`}
-                sizes="(max-width: 1280px) 100vw, 1280px"
-                alt=""
-                className="h-full w-full object-cover"
-                fetchPriority={idx === 0 ? 'high' : 'auto'}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent sm:bg-gradient-to-r sm:from-ink/85 sm:via-ink/45 sm:to-transparent" />
-              <div className="absolute inset-0 flex items-end p-6 sm:items-center sm:p-12 lg:p-16">
-                <div className="max-w-lg text-white">
-                  <span className="inline-block rounded-full bg-brand-500 px-3 py-1 text-xs font-bold uppercase tracking-wider">{b.eyebrow}</span>
-                  <h1 className="mt-4 font-display text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">{b.title}</h1>
-                  <p className="urdu mt-1 text-xl text-brand-200 sm:text-2xl">{b.titleUr}</p>
-                  <p className="mt-3 text-sm text-white/80 sm:text-base">{b.text}</p>
-                  <Link to="/shop" search={b.cta.search} className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-ink transition hover:bg-brand-50">
-                    {b.cta.label} <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <Link
+              key={b.image}
+              to="/shop"
+              search={b.search}
+              className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+              aria-hidden={idx !== i}
+              tabIndex={idx === i ? 0 : -1}
+            >
+              <img src={img(b.image, 1600)} alt={b.alt} className="h-full w-full object-cover" fetchPriority={idx === 0 ? 'high' : 'auto'} />
+            </Link>
           ))}
         </div>
-        <div className="absolute bottom-4 right-4 flex items-center gap-2 sm:bottom-6 sm:right-6">
-          <button type="button" onClick={() => go(-1)} className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/30" aria-label="Previous banner">
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <div className="flex gap-1.5">
-            {banners.map((b, idx) => (
-              <button key={b.image} type="button" onClick={() => setI(idx)} className={`h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-brand-400' : 'w-2 bg-white/50'}`} aria-label={`Show banner ${idx + 1}`} />
-            ))}
-          </div>
-          <button type="button" onClick={() => go(1)} className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/30" aria-label="Next banner">
-            <ChevronRight className="h-5 w-5" />
-          </button>
+        <button type="button" onClick={() => go(-1)} className="absolute left-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-black/25 text-white backdrop-blur hover:bg-black/40" aria-label="Previous banner">
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button type="button" onClick={() => go(1)} className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-black/25 text-white backdrop-blur hover:bg-black/40" aria-label="Next banner">
+          <ChevronRight className="h-5 w-5" />
+        </button>
+        <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">
+          {banners.map((b, idx) => (
+            <button key={b.image} type="button" onClick={() => setI(idx)} className={`h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-white' : 'w-2 bg-white/60'}`} aria-label={`Show banner ${idx + 1}`} />
+          ))}
         </div>
       </div>
     </section>

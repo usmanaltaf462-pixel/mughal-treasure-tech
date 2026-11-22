@@ -117,7 +117,8 @@
     "nameUr": "وائرلیس ایئربڈز",
     "categoryId": "c-electronics",
     "images": [
-      "/img/earbuds.webp"
+      "/img/earbuds-pro-1.webp",
+      "/img/earbuds-pro-2.webp"
     ],
     "shortDescription": "Bluetooth 5.3 earbuds with charging case and clear calls.",
     "description": "Bluetooth 5.3 earbuds with charging case and clear calls. Sample listing — replace with your real product details.",
@@ -143,7 +144,8 @@
     "nameUr": "بلوٹوتھ نیک بینڈ",
     "categoryId": "c-electronics",
     "images": [
-      "/img/neckband.webp"
+      "/img/neckband-1.webp",
+      "/img/neckband-2.webp"
     ],
     "shortDescription": "Lightweight neckband with deep bass and all-day battery.",
     "description": "Lightweight neckband with deep bass and all-day battery. Sample listing — replace with your real product details.",
@@ -219,7 +221,8 @@
     "nameUr": "سمارٹ واچ",
     "categoryId": "c-electronics",
     "images": [
-      "/img/smartwatch.webp"
+      "/img/smartwatch-1.webp",
+      "/img/smartwatch-2.webp"
     ],
     "shortDescription": "Smart watch with calls, heart-rate tracking and long battery.",
     "description": "Smart watch with calls, heart-rate tracking and long battery. Sample listing — replace with your real product details.",
@@ -269,7 +272,8 @@
     "nameUr": "بچوں کا لرننگ ٹوائے سیٹ",
     "categoryId": "c-kids",
     "images": [
-      "/img/kids-toy-set.webp"
+      "/img/kids-toy-set-1.webp",
+      "/img/kids-toy-set-2.webp"
     ],
     "shortDescription": "Colourful learning toy set that builds skills through play.",
     "description": "Colourful learning toy set that builds skills through play. Sample listing — replace with your real product details.",
@@ -315,18 +319,20 @@
   {
     "id": "p-1009",
     "slug": "kids-school-backpack",
-    "name": "Kids School Backpack",
-    "nameUr": "بچوں کا اسکول بیگ",
+    "name": "Plush Cat Backpack",
+    "nameUr": "بلی کا پلش بیگ",
     "categoryId": "c-kids",
     "images": [
-      "/img/kids-backpack.webp"
+      "/img/kids-backpack-1.webp",
+      "/img/kids-backpack-2.webp"
     ],
-    "shortDescription": "Lightweight, roomy school backpack with padded straps.",
-    "description": "Lightweight, roomy school backpack with padded straps. Sample listing — replace with your real product details.",
+    "shortDescription": "Soft, fluffy cat backpack kids will love to carry.",
+    "description": "A cute plush cat backpack with a bow collar and soft fluffy straps. Looks like a cuddly toy and works as a backpack. Sample listing — replace with your real product details.",
     "highlights": [
-      "Padded straps",
-      "Roomy compartments",
-      "Water resistant"
+      "Soft plush cat design",
+      "Fluffy shoulder straps",
+      "Cute bow collar",
+      "A toy and a bag in one"
     ],
     "price": 2199,
     "salePrice": 1699,
