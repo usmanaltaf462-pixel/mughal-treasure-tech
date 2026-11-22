@@ -1,5 +1,33 @@
 [
   {
+    "id": "p-1795314331265",
+    "slug": "trendy-wireless-earbuds-air31-srr4",
+    "name": "Trendy Wireless Earbuds Air31",
+    "nameUr": "Trendy Wireless Earbuds Air31",
+    "categoryId": "c-electronics",
+    "images": [
+      "/img/trendy-wireless-earbuds-air31-srr4-1.webp",
+      "/img/trendy-wireless-earbuds-air31-srr4-2.webp",
+      "/img/trendy-wireless-earbuds-air31-srr4-3.webp"
+    ],
+    "shortDescription": "Stay connected on the go with our wireless earbuds",
+    "description": "These earbuds feature a sleek and modern design, with a compact charging case that fits easily in your pocket. They are designed for comfortable wear and come in a range of stylish colors.",
+    "highlights": [
+      "Waterproof design",
+      "Crystal-clear sound",
+      "Long battery life",
+      "Easy pairing"
+    ],
+    "price": 800,
+    "salePrice": 680,
+    "stock": 20,
+    "rating": 0,
+    "reviews": 0,
+    "featured": true,
+    "isNew": true,
+    "createdAt": "2026-11-22"
+  },
+  {
     "id": "p-1795286148245",
     "slug": "wireless-earbuds-0plf",
     "name": "Wireless Earbuds",
