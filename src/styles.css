@@ -68,11 +68,3 @@ body {
   animation: fade-up 0.5s ease-out both;
 }
 
-/* Top bar ticker: scrolls continuously, pauses on hover/touch */
-@keyframes mt-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.mt-marquee { animation: mt-marquee 50s linear infinite; }
-.mt-marquee:hover, .mt-marquee:active { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) { .mt-marquee { animation-duration: 180s; } }

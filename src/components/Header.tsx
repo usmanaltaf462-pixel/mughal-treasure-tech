@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Menu, Phone, Search, ShoppingBag, Truck, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { categories } from '@/data/catalog'
 import { useCart } from '@/lib/cart'
 import { SITE, waLink } from '@/lib/site'
@@ -8,24 +8,65 @@ import { Logo } from './Logo'
 
 const TOP_AR = "'Amiri','Noto Naskh Arabic','Traditional Arabic',serif"
 function TopMessage() {
-  // One continuous ticker: Bismillah -> ayat -> Urdu translation -> delivery offer, then it loops.
+  // Urdu/Arabic scroll left-to-right (the way they are read), English scrolls right-to-left.
+  // They take turns, one after the other, and the cycle never stops.
+  const box = useRef<HTMLDivElement>(null)
+  const rtl = useRef<HTMLDivElement>(null)
+  const ltr = useRef<HTMLDivElement>(null)
+  const current = useRef<Animation | null>(null)
+
+  useEffect(() => {
+    let stop = false
+    const slow = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const speed = slow ? 30 : 60 // pixels per second
+    const phases: Array<[React.RefObject<HTMLDivElement | null>, 'right' | 'left']> = [[rtl, 'right'], [ltr, 'left']]
+    ;(async () => {
+      while (!stop) {
+        for (const [ref, dir] of phases) {
+          const el = ref.current
+          const wrap = box.current
+          if (stop || !el || !wrap) return
+          const cw = wrap.clientWidth
+          const tw = el.offsetWidth
+          const from = dir === 'right' ? -tw : cw
+          const to = dir === 'right' ? cw : -tw
+          el.style.visibility = 'visible'
+          const anim = el.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], { duration: ((cw + tw) / speed) * 1000, easing: 'linear', fill: 'both' })
+          current.current = anim
+          try { await anim.finished } catch { /* cancelled */ }
+          el.style.visibility = 'hidden'
+        }
+      }
+    })()
+    return () => {
+      stop = true
+      current.current?.cancel()
+    }
+  }, [])
+
   const dot = <span aria-hidden className="text-amber-200">✦</span>
-  const items = [
-    <span key="b" dir="rtl" style={{ fontFamily: TOP_AR, fontSize: '18px', fontWeight: 700 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>,
-    <span key="a" dir="rtl" style={{ fontFamily: TOP_AR, fontSize: '17px' }}>﴿ وَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا ۚ وَاتَّقُوا اللَّهَ الَّذِي أَنتُم بِهِ مُؤْمِنُونَ ﴾ — المائدہ: 88</span>,
-    <span key="u" className="urdu" dir="rtl" style={{ fontSize: '14px', lineHeight: 1.8 }}>اور جو حلال اور پاکیزہ رزق اللہ نے تمہیں دیا ہے اس میں سے کھاؤ، اور اس اللہ سے ڈرتے رہو جس پر تم ایمان رکھتے ہو۔</span>,
-    <span key="o" className="flex items-center gap-1.5"><Truck className="h-3.5 w-3.5 shrink-0" /> Cash on Delivery all over Pakistan · Free delivery over Rs 5,000</span>,
-  ]
-  const track = (
-    <div className="flex shrink-0 items-center gap-8 pr-8">
-      {items.map((it, i) => (
-        <span key={i} className="flex items-center gap-8 whitespace-nowrap">{it}{dot}</span>
-      ))}
-    </div>
-  )
+  const track = 'absolute inset-y-0 left-0 flex w-max items-center gap-8 whitespace-nowrap invisible'
   return (
-    <div className="relative min-w-0 flex-1 overflow-hidden" aria-label="Bismillah, Quran 5:88 and delivery offer">
-      <div className="mt-marquee flex w-max items-center">{track}{track}</div>
+    <div
+      ref={box}
+      className="relative h-7 min-w-0 flex-1 overflow-hidden"
+      aria-label="Bismillah, Quran 5:88 and delivery offer"
+      onMouseEnter={() => current.current?.pause()}
+      onMouseLeave={() => current.current?.play()}
+      onTouchStart={() => current.current?.pause()}
+      onTouchEnd={() => current.current?.play()}
+    >
+      <div ref={rtl} dir="rtl" className={track}>
+        <span style={{ fontFamily: TOP_AR, fontSize: '19px', fontWeight: 700 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+        {dot}
+        <span style={{ fontFamily: TOP_AR, fontSize: '18px' }}>﴿ وَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا ۚ وَاتَّقُوا اللَّهَ الَّذِي أَنتُم بِهِ مُؤْمِنُونَ ﴾ — المائدہ: 88</span>
+        {dot}
+        <span className="urdu" style={{ fontSize: '15px', lineHeight: 1.8 }}>اور جو حلال اور پاکیزہ رزق اللہ نے تمہیں دیا ہے اس میں سے کھاؤ، اور اس اللہ سے ڈرتے رہو جس پر تم ایمان رکھتے ہو۔</span>
+      </div>
+      <div ref={ltr} dir="ltr" className={track}>
+        <Truck className="h-3.5 w-3.5 shrink-0" />
+        <span>Cash on Delivery all over Pakistan · Free delivery over Rs 5,000</span>
+      </div>
     </div>
   )
 }
