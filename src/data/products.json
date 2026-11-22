@@ -171,7 +171,8 @@
     "nameUr": "20 واٹ فاسٹ چارجر",
     "categoryId": "c-electronics",
     "images": [
-      "/img/charger-1.webp"
+      "/img/charger-1.webp",
+      "/img/charger-2.webp"
     ],
     "shortDescription": "Compact fast charger for phones, with short-circuit protection.",
     "description": "Compact fast charger for phones, with short-circuit protection. Sample listing — replace with your real product details.",
@@ -351,15 +352,15 @@
     "nameUr": "بچوں کی پانی کی بوتل",
     "categoryId": "c-kids",
     "images": [
-      "/img/bottle-1.webp"
+      "/img/bottle-1.webp",
+      "/img/bottle-2.webp"
     ],
     "shortDescription": "Kids water bottle with a cartoon print, flip-up lid and carry strap.",
-    "description": "A fun kids water bottle with a cartoon print, a flip-up drinking lid and an adjustable carry strap, easy for school. Sample listing — replace with your real product details.",
+    "description": "A fun kids water bottle with a cartoon print, a flip-up lid and an adjustable carry strap, so it is easy to take to school. Sample listing — replace with your real product details.",
     "highlights": [
       "Cartoon character prints",
-      "Flip-up drinking lid",
-      "Carry strap included",
-      "Easy to carry to school"
+      "Flip-up lid",
+      "Carry strap included"
     ],
     "price": 899,
     "salePrice": 649,
