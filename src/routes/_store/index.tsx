@@ -36,15 +36,32 @@ function BismillahSlide() {
   )
 }
 
-const slides: Array<{ image: string; alt: string; search: { category?: string; sale?: boolean }; text?: boolean }> = [
-  { image: 'bismillah', alt: 'Bismillah ir-Rahman ir-Rahim, and Quran 5:88 about halal and pure sustenance', search: {}, text: true },
+function DuaSlide() {
+  return (
+    <div className="absolute inset-0 overflow-hidden" style={{ containerType: 'inline-size', background: 'linear-gradient(135deg,#0a1a3a 0%,#123a6b 55%,#1a5a8a 100%)' }}>
+      <div className="absolute inset-0" style={{ opacity: 0.08, backgroundImage: 'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)', backgroundSize: '22px 22px' }} />
+      <div className="absolute" style={{ inset: '2.2cqw', borderRadius: '2.4cqw', border: '1px solid rgba(250,204,21,.5)' }} />
+      <div className="relative flex h-full flex-col items-center justify-center text-center" style={{ padding: '3cqw 8cqw 5cqw', gap: '0.6cqw' }}>
+        <p className="urdu" style={{ fontSize: '3cqw', lineHeight: 1.8, color: '#facc15', fontWeight: 600 }}>حلال و طیب رزق کی دعا</p>
+        <div style={{ width: '14cqw', height: '2px', background: 'rgba(250,204,21,.6)', margin: '0.3cqw 0' }} />
+        <p dir="rtl" style={{ fontFamily: AR, fontSize: '4.6cqw', lineHeight: 1.7, color: '#ffffff', fontWeight: 700 }}>اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ</p>
+        <p className="urdu" style={{ fontSize: '2.5cqw', lineHeight: 1.9, color: '#dbeafe' }}>اے اللہ! اپنے حلال کے ذریعے مجھے حرام سے بچا کر کافی ہو جا، اور اپنے فضل سے مجھے اپنے سوا سب سے بے نیاز کر دے۔</p>
+        <p className="urdu" style={{ fontSize: '1.9cqw', lineHeight: 1.8, color: '#facc15' }}>جامع ترمذی: 3563</p>
+      </div>
+    </div>
+  )
+}
+
+const slides: Array<{ image: string; alt: string; search: { category?: string; sale?: boolean }; text?: 'bismillah' | 'dua' }> = [
+  { image: 'bismillah', alt: 'Bismillah ir-Rahman ir-Rahim, and Quran 5:88 about halal and pure sustenance', search: {}, text: 'bismillah' },
+  { image: 'dua', alt: 'Dua for halal and pure sustenance, Jami at-Tirmidhi 3563', search: {}, text: 'dua' },
   ...banners,
 ]
 
 function Hero() {
   const [i, setI] = useState(0)
   useEffect(() => {
-    const t = setTimeout(() => setI((n) => (n + 1) % slides.length), i === 0 ? 9000 : 5000)
+    const t = setTimeout(() => setI((n) => (n + 1) % slides.length), i <= 1 ? 9000 : 5000)
     return () => clearTimeout(t)
   }, [i])
   const go = (d: number) => setI((n) => (n + d + slides.length) % slides.length)
@@ -57,7 +74,7 @@ function Hero() {
           {slides.map((b, idx) =>
             b.text ? (
               <div key={b.image} className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`} aria-hidden={idx !== i}>
-                <BismillahSlide />
+                {b.text === 'dua' ? <DuaSlide /> : <BismillahSlide />}
               </div>
             ) : (
               <Link
@@ -68,7 +85,7 @@ function Hero() {
                 aria-hidden={idx !== i}
                 tabIndex={idx === i ? 0 : -1}
               >
-                <img src={img(b.image, 1600)} alt={b.alt} className="h-full w-full object-cover" fetchPriority={idx === 1 ? 'high' : 'auto'} />
+                <img src={img(b.image, 1600)} alt={b.alt} className="h-full w-full object-cover" fetchPriority={idx === 2 ? 'high' : 'auto'} />
               </Link>
             ),
           )}
