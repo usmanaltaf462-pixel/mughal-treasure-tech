@@ -1,5 +1,33 @@
 [
   {
+    "id": "p-1795367708993",
+    "slug": "a6s-tws-earbuds-ku9t",
+    "name": "A6S TWS EARBUDS",
+    "nameUr": "A6S TWS EARBUDS",
+    "categoryId": "c-electronics",
+    "images": [
+      "/img/a6s-tws-earbuds-ku9t-1.webp",
+      "/img/a6s-tws-earbuds-ku9t-2.webp",
+      "/img/a6s-tws-earbuds-ku9t-3.webp"
+    ],
+    "shortDescription": "Wireless earbuds for listening to music",
+    "description": "These earbuds have a sleek and modern design. They are wireless and come in a charging case. The earbuds are designed to fit comfortably in your ears.",
+    "highlights": [
+      "Bluetooth 5.0",
+      "One Button Control",
+      "Stereo Sound",
+      "Built-in Microphone"
+    ],
+    "price": 900,
+    "salePrice": 720,
+    "stock": 20,
+    "rating": 0,
+    "reviews": 0,
+    "featured": true,
+    "isNew": true,
+    "createdAt": "2026-11-22"
+  },
+  {
     "id": "p-1795314331265",
     "slug": "trendy-wireless-earbuds-air31-srr4",
     "name": "Trendy Wireless Earbuds Air31",
