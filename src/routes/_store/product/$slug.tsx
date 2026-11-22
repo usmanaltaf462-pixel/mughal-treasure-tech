@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { QtyStepper } from '@/components/CartDrawer'
 import { Price } from '@/components/Price'
 import { ProductCard } from '@/components/ProductCard'
+import { Reviews } from '@/components/Reviews'
 import { getCategory, getProductBySlug, products } from '@/data/catalog'
 import { useCart } from '@/lib/cart'
 import { img } from '@/lib/format'
@@ -141,6 +142,7 @@ function ProductPage() {
         </div>
       </div>
 
+      <Reviews productId={product.id} />
       {related.length > 0 && (
         <section className="mt-16">
           <h2 className="mb-5 font-display text-2xl font-bold">You may also like</h2>

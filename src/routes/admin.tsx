@@ -30,8 +30,11 @@ function Admin() {
   const [sale, setSale] = useState('')
   const [stock, setStock] = useState('20')
   const [f, setF] = useState(empty)
-  const [tab, setTab] = useState<'products' | 'orders' | 'sales'>('products')
+  const [tab, setTab] = useState<'products' | 'orders' | 'sales' | 'customers' | 'reviews'>('products')
   const [orders, setOrders] = useState<P[] | null>(null)
+  const [customers, setCustomers] = useState<P[] | null>(null)
+  const [reviews, setReviews] = useState<P[] | null>(null)
+  const [q, setQ] = useState('')
 
   useEffect(() => { try { setKey(localStorage.getItem('adminKey') || '') } catch { /* ignore */ } }, [])
 
@@ -55,7 +58,29 @@ function Admin() {
     setProducts(await api('/api/products')); setMsg('')
   })
   const loadOrders = () => run('Orders load ho rahe hain…', async () => { setOrders(await api('/api/orders')); setMsg('') })
-  const go = (t: 'products' | 'orders' | 'sales') => { setTab(t); if (t !== 'products') loadOrders() }
+  const loadCustomers = () => run('Customers load ho rahe hain…', async () => { setCustomers(await api('/api/customers')); setMsg('') })
+  const loadReviews = () => run('Reviews load ho rahe hain…', async () => { setReviews(await api('/api/admin-reviews')); setMsg('') })
+  const go = (t: 'products' | 'orders' | 'sales' | 'customers' | 'reviews') => {
+    setTab(t)
+    if (t === 'orders' || t === 'sales') loadOrders()
+    if (t === 'customers') loadCustomers()
+    if (t === 'reviews') loadReviews()
+  }
+  const reviewStatus = (r: P, status: string) => run('Update ho raha hai…', async () => {
+    await api('/api/review-status', { id: r.id, status })
+    setReviews((reviews || []).map((x) => (x.id === r.id ? { ...x, status } : x))); setMsg('✅ Update ho gaya')
+  })
+  const reviewDelete = (r: P) => confirm('Ye review delete karein?') && run('Delete ho raha hai…', async () => {
+    await api('/api/review-delete', { id: r.id })
+    setReviews((reviews || []).filter((x) => x.id !== r.id)); setMsg('✅ Delete ho gaya')
+  })
+  const downloadCsv = () => {
+    const rows = [['Name', 'Phone', 'City', 'Address', 'Orders', 'Total spent', 'Last order'], ...(customers || []).map((c) => [c.name, c.phone, c.city, c.address, c.orders, c.spent, c.last_order])]
+    const csv = rows.map((r) => r.map((v) => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\n')
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }))
+    a.download = 'customers.csv'; a.click()
+  }
   const setStatus = (o: P, status: string, tracking?: string) => run('Status update ho raha hai…', async () => {
     await api('/api/order-status', { id: o.id, status, tracking })
     setOrders((orders || []).map((x) => (x.id === o.id ? { ...x, status, tracking: tracking ?? x.tracking } : x))); setMsg('✅ Update ho gaya')
@@ -130,7 +155,7 @@ function Admin() {
       ) : (
         <>
           <div className="flex gap-2">
-            {(['products', 'orders', 'sales'] as const).map((t) => (
+            {(['products', 'orders', 'sales', 'customers', 'reviews'] as const).map((t) => (
               <button key={t} onClick={() => go(t)} className={'rounded-full px-4 py-2 text-sm font-semibold capitalize ' + (tab === t ? 'bg-brand-500 text-white' : 'bg-black/5')}>{t}</button>
             ))}
           </div>
@@ -164,6 +189,43 @@ function Admin() {
               <div className="flex justify-between rounded-xl border border-black/10 p-3"><span>Kul · {live.length} orders</span><b>Rs {sum(live).toLocaleString()}</b></div>
               <h3 className="pt-2 font-semibold">Sab se zyada bikne wale</h3>
               {Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([n, q]) => <div key={n} className="flex justify-between text-sm"><span>{n}</span><span>{q} pcs</span></div>)}
+            </section>
+          )}
+          {tab === 'customers' && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-bold">Customers ({customers?.length ?? 0})</h2>
+                <button className="rounded-full bg-black/5 px-4 py-2 text-sm font-semibold" disabled={!customers?.length} onClick={downloadCsv}>CSV download</button>
+              </div>
+              <input className={inp} placeholder="Naam, phone ya shehar se dhoondhein" value={q} onChange={(e) => setQ(e.target.value)} />
+              {(customers || []).filter((c) => (c.name + ' ' + c.phone + ' ' + c.city).toLowerCase().includes(q.toLowerCase())).map((c) => (
+                <div key={c.phone} className="space-y-1 rounded-2xl border border-black/10 p-3 text-sm">
+                  <div className="flex justify-between font-semibold"><span>{c.name}</span><span>Rs {Number(c.spent).toLocaleString()}</span></div>
+                  <div><a className="text-brand-600" href={'tel:' + c.phone}>{c.phone}</a> · <a className="text-brand-600" href={wa(c.phone)}>WhatsApp</a></div>
+                  <div className="text-black/70">{c.address}, {c.city}</div>
+                  <div className="text-black/50">{c.orders} order{c.orders > 1 ? 's' : ''} · aakhri: {new Date(c.last_order).toLocaleDateString()}</div>
+                </div>
+              ))}
+              {customers && !customers.length && <p className="text-black/50">Abhi koi customer nahi. Pehla order aate hi yahan save ho jayega.</p>}
+            </section>
+          )}
+          {tab === 'reviews' && (
+            <section className="space-y-3">
+              <h2 className="font-bold">Reviews ({reviews?.length ?? 0})</h2>
+              {(reviews || []).map((r) => (
+                <div key={r.id} className="space-y-1 rounded-2xl border border-black/10 p-3 text-sm">
+                  <div className="flex justify-between font-semibold"><span>{r.name} · {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span><span className={r.status === 'pending' ? 'text-amber-600' : 'text-green-600'}>{r.status === 'pending' ? 'Pending' : 'Live'}</span></div>
+                  <div className="text-black/50">{(products || []).find((p) => p.id === r.product_id)?.name || r.product_id} · {new Date(r.created_at).toLocaleDateString()}</div>
+                  <p className="whitespace-pre-line">{r.comment}</p>
+                  <div className="flex gap-4 pt-1">
+                    {r.status === 'pending'
+                      ? <button className="font-semibold text-green-700" disabled={busy} onClick={() => reviewStatus(r, 'approved')}>Approve</button>
+                      : <button className="font-semibold text-black/60" disabled={busy} onClick={() => reviewStatus(r, 'pending')}>Hide</button>}
+                    <button className="font-semibold text-red-600" disabled={busy} onClick={() => reviewDelete(r)}>Delete</button>
+                  </div>
+                </div>
+              ))}
+              {reviews && !reviews.length && <p className="text-black/50">Abhi koi review nahi.</p>}
             </section>
           )}
           {tab === 'products' && (<>

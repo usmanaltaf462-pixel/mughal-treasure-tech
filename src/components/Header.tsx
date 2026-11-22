@@ -1,10 +1,28 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Menu, Phone, Search, ShoppingBag, Truck, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { categories } from '@/data/catalog'
 import { useCart } from '@/lib/cart'
 import { SITE, waLink } from '@/lib/site'
 import { Logo } from './Logo'
+
+const TOP_AR = "'Amiri','Noto Naskh Arabic','Traditional Arabic',serif"
+function TopMessage() {
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setN((x) => (x + 1) % 4), 4500)
+    return () => clearInterval(t)
+  }, [])
+  const box = 'flex min-h-[22px] flex-1 items-center justify-center gap-1.5 text-center leading-tight sm:justify-start sm:text-left'
+  if (n === 0) return <span className={box} dir="rtl" style={{ fontFamily: TOP_AR, fontSize: '17px', fontWeight: 700 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+  if (n === 1) return <span className={box} dir="rtl" style={{ fontFamily: TOP_AR, fontSize: '16px' }}>﴿ وَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا ﴾ — المائدہ: 88</span>
+  if (n === 2) return <span className={`${box} urdu`} dir="rtl" style={{ fontSize: '13px', lineHeight: 1.7 }}>اور جو حلال اور پاکیزہ رزق اللہ نے تمہیں دیا ہے اس میں سے کھاؤ</span>
+  return (
+    <span className={box}>
+      <Truck className="h-3.5 w-3.5 shrink-0" /> Cash on Delivery all over Pakistan · Free delivery over Rs 5,000
+    </span>
+  )
+}
 
 export function Header() {
   const { count, setOpen } = useCart()
@@ -35,9 +53,7 @@ export function Header() {
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur">
       <div className="bg-brand-500 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-1.5 text-xs font-medium">
-          <span className="flex items-center gap-1.5">
-            <Truck className="h-3.5 w-3.5" /> Cash on Delivery all over Pakistan · Free delivery over Rs 5,000
-          </span>
+          <TopMessage />
           <span className="hidden items-center gap-1.5 sm:flex">
             <Phone className="h-3.5 w-3.5" /> <a href={waLink()} target="_blank" rel="noopener noreferrer">{SITE.phoneDisplay}</a>
           </span>

@@ -41,10 +41,16 @@ async function getProducts(env) {
 
 const SCHEMA = `CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new', name TEXT, phone TEXT, city TEXT, address TEXT, notes TEXT, items TEXT, subtotal INTEGER, delivery INTEGER, total INTEGER)`
 const STATUSES = ['new', 'confirmed', 'packed', 'dispatched', 'delivered', 'cancelled']
+const REVIEWS_SCHEMA = `CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id TEXT NOT NULL, name TEXT, rating INTEGER NOT NULL, comment TEXT, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', ip TEXT)`
+async function hashIp(ip) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('mt-' + ip))
+  return [...new Uint8Array(b)].slice(0, 8).map((x) => x.toString(16).padStart(2, '0')).join('')
+}
 let ready = false
 async function ensure(env) {
   if (ready) return
   await env.DB.prepare(SCHEMA).run()
+  await env.DB.prepare(REVIEWS_SCHEMA).run()
   try { await env.DB.prepare('ALTER TABLE orders ADD COLUMN tracking TEXT').run() } catch (e) { /* column already exists */ }
   ready = true
 }
@@ -150,6 +156,32 @@ export default {
         return json({ id: r.id, status: r.status === 'shipped' ? 'dispatched' : r.status, created_at: r.created_at, total: r.total, items, tracking: r.tracking || '', courier: 'PostEx' })
       } catch (e) { return json({ error: 'Kuch masla aa gaya, dobara try karein.' }, 400) }
     }
+    if (url.pathname === '/api/reviews' && req.method === 'GET') {
+      try {
+        await ensure(env)
+        const pid = str(url.searchParams.get('product'), 40)
+        const { results } = await env.DB.prepare("SELECT id, name, rating, comment, created_at FROM reviews WHERE product_id = ? AND status = 'approved' ORDER BY id DESC LIMIT 50").bind(pid).all()
+        const count = results.length
+        const avg = count ? results.reduce((a, r) => a + r.rating, 0) / count : 0
+        return json({ avg: Math.round(avg * 10) / 10, count, reviews: results })
+      } catch (e) { return json({ avg: 0, count: 0, reviews: [] }) }
+    }
+    if (url.pathname === '/api/review' && req.method === 'POST') {
+      try {
+        const b = await req.json()
+        if (b.website) return json({ ok: true })
+        const rating = Math.round(Number(b.rating))
+        const name = str(b.name, 60).trim(), comment = str(b.comment, 600).trim(), pid = str(b.productId, 40).trim()
+        if (!pid || !name || comment.length < 3 || !(rating >= 1 && rating <= 5)) return json({ error: 'Naam, rating aur review likhna zaroori hai.' }, 400)
+        await ensure(env)
+        const ip = await hashIp(req.headers.get('cf-connecting-ip') || 'unknown')
+        const since = new Date(Date.now() - 864e5).toISOString()
+        const c = await env.DB.prepare('SELECT COUNT(*) AS n FROM reviews WHERE ip = ? AND created_at > ?').bind(ip, since).first()
+        if (c && c.n >= 5) return json({ error: 'Aaj ke liye bohat reviews ho gaye, kal dobara try karein.' }, 429)
+        await env.DB.prepare("INSERT INTO reviews (product_id, name, rating, comment, created_at, status, ip) VALUES (?,?,?,?,?, 'pending', ?)").bind(pid, name, rating, comment, new Date().toISOString(), ip).run()
+        return json({ ok: true })
+      } catch (e) { return json({ error: 'Kuch masla aa gaya, dobara try karein.' }, 400) }
+    }
     if (!env.ADMIN_PASSWORD || !env.GITHUB_TOKEN) return json({ error: 'Server is not set up yet (missing secrets).' }, 500)
     if (!same(req.headers.get('x-admin-key') || '', env.ADMIN_PASSWORD)) {
       await new Promise((r) => setTimeout(r, 800))
@@ -157,6 +189,29 @@ export default {
     }
     try {
       if (url.pathname === '/api/products' && req.method === 'GET') return json(await getProducts(env))
+      if (url.pathname === '/api/customers' && req.method === 'GET') {
+        await ensure(env)
+        const { results } = await env.DB.prepare("SELECT MAX(phone) AS phone, MAX(name) AS name, MAX(city) AS city, MAX(address) AS address, COUNT(*) AS orders, SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END) AS spent, MAX(created_at) AS last_order FROM orders GROUP BY substr(replace(replace(replace(replace(phone, ' ', ''), '-', ''), '+', ''), '.', ''), -10) ORDER BY last_order DESC LIMIT 1000").all()
+        return json(results)
+      }
+      if (url.pathname === '/api/admin-reviews' && req.method === 'GET') {
+        await ensure(env)
+        const { results } = await env.DB.prepare("SELECT id, product_id, name, rating, comment, created_at, status FROM reviews ORDER BY (status = 'pending') DESC, id DESC LIMIT 300").all()
+        return json(results)
+      }
+      if (url.pathname === '/api/review-status' && req.method === 'POST') {
+        const { id, status } = await req.json()
+        if (!['approved', 'pending'].includes(status)) return json({ error: 'Bad status' }, 400)
+        await ensure(env)
+        await env.DB.prepare('UPDATE reviews SET status = ? WHERE id = ?').bind(status, Number(id)).run()
+        return json({ ok: true })
+      }
+      if (url.pathname === '/api/review-delete' && req.method === 'POST') {
+        const { id } = await req.json()
+        await ensure(env)
+        await env.DB.prepare('DELETE FROM reviews WHERE id = ?').bind(Number(id)).run()
+        return json({ ok: true })
+      }
       if (url.pathname === '/api/orders' && req.method === 'GET') {
         await ensure(env)
         const { results } = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC LIMIT 500').all()
