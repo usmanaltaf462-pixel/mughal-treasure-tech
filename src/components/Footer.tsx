@@ -11,18 +11,30 @@ const perks = [
   { icon: ShieldCheck, title: 'Quality Assured', ur: 'معیار کی ضمانت', text: 'Genuine, tested products' },
 ]
 
+const PERK_COLORS: Array<[string, string]> = [
+  ['#f97316', '#fbbf24'],
+  ['#2563eb', '#22d3ee'],
+  ['#059669', '#2dd4bf'],
+  ['#c026d3', '#fb7185'],
+]
+
 export function Perks() {
   return (
-    <section className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 lg:grid-cols-4">
-      {perks.map((p) => (
-        <div key={p.title} className="flex items-center gap-3 rounded-2xl border border-ink/5 bg-white p-4">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
-            <p.icon className="h-5 w-5" />
+    <section className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 sm:gap-4 lg:grid-cols-4">
+      {perks.map((p, i) => (
+        <div
+          key={p.title}
+          className="group relative overflow-hidden rounded-3xl p-4 text-white shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-5"
+          style={{ background: `linear-gradient(135deg, ${PERK_COLORS[i % 4][0]}, ${PERK_COLORS[i % 4][1]})` }}
+        >
+          <p.icon className="pointer-events-none absolute -bottom-5 -right-5 h-24 w-24 rotate-12 text-white/15 transition duration-300 group-hover:rotate-0 sm:h-28 sm:w-28" />
+          <span className="pointer-events-none absolute -left-7 -top-7 h-20 w-20 rounded-full bg-white/10" />
+          <span className="pointer-events-none absolute right-6 top-4 h-2 w-2 rounded-full bg-white/50" />
+          <span className="relative grid h-11 w-11 place-items-center rounded-2xl bg-white/20 ring-1 ring-white/40 backdrop-blur">
+            <p.icon className="h-6 w-6" />
           </span>
-          <div className="min-w-0">
-            <p className="text-sm font-bold leading-tight">{p.title}</p>
-            <p className="text-xs text-ink/50">{p.text}</p>
-          </div>
+          <p className="relative mt-3 text-[15px] font-extrabold leading-tight sm:text-base">{p.title}</p>
+          <p className="relative mt-1 text-xs leading-snug text-white/90 sm:text-sm">{p.text}</p>
         </div>
       ))}
     </section>
