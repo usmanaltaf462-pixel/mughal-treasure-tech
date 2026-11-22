@@ -18,31 +18,60 @@ const banners = [
   { image: '/img/banner-cod.webp', alt: 'Cash on Delivery across Pakistan, free delivery over Rs 5,000', search: {} },
 ]
 
+const AR = "'Amiri','Noto Naskh Arabic','Traditional Arabic',serif"
+
+function BismillahSlide() {
+  return (
+    <div className="absolute inset-0 overflow-hidden" style={{ containerType: 'inline-size', background: 'linear-gradient(135deg,#052e2b 0%,#0b5d4b 55%,#0f766e 100%)' }}>
+      <div className="absolute inset-0" style={{ opacity: 0.08, backgroundImage: 'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)', backgroundSize: '22px 22px' }} />
+      <div className="absolute" style={{ inset: '2.2cqw', borderRadius: '2.4cqw', border: '1px solid rgba(250,204,21,.5)' }} />
+      <div className="relative flex h-full flex-col items-center justify-center text-center" style={{ padding: '3cqw 8cqw 5cqw', gap: '0.6cqw' }}>
+        <p dir="rtl" style={{ fontFamily: AR, fontSize: '6.6cqw', lineHeight: 1.5, color: '#facc15', fontWeight: 700 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+        <div style={{ width: '14cqw', height: '2px', background: 'rgba(250,204,21,.6)', margin: '0.4cqw 0' }} />
+        <p dir="rtl" style={{ fontFamily: AR, fontSize: '3.5cqw', lineHeight: 1.8, color: '#ffffff' }}>﴿ وَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا ۚ وَاتَّقُوا اللَّهَ الَّذِي أَنتُم بِهِ مُؤْمِنُونَ ﴾</p>
+        <p className="urdu" style={{ fontSize: '2.5cqw', lineHeight: 1.9, color: '#d1fae5' }}>اور جو حلال اور پاکیزہ رزق اللہ نے تمہیں دیا ہے اس میں سے کھاؤ، اور اس اللہ سے ڈرتے رہو جس پر تم ایمان رکھتے ہو۔</p>
+        <p className="urdu" style={{ fontSize: '1.9cqw', lineHeight: 1.8, color: '#facc15' }}>سورۃ المائدہ، آیت 88</p>
+      </div>
+    </div>
+  )
+}
+
+const slides: Array<{ image: string; alt: string; search: { category?: string; sale?: boolean }; text?: boolean }> = [
+  { image: 'bismillah', alt: 'Bismillah ir-Rahman ir-Rahim, and Quran 5:88 about halal and pure sustenance', search: {}, text: true },
+  ...banners,
+]
+
 function Hero() {
   const [i, setI] = useState(0)
   useEffect(() => {
-    const t = setInterval(() => setI((n) => (n + 1) % banners.length), 5000)
-    return () => clearInterval(t)
-  }, [])
-  const go = (d: number) => setI((n) => (n + d + banners.length) % banners.length)
+    const t = setTimeout(() => setI((n) => (n + 1) % slides.length), i === 0 ? 9000 : 5000)
+    return () => clearTimeout(t)
+  }, [i])
+  const go = (d: number) => setI((n) => (n + d + slides.length) % slides.length)
 
   return (
     <section className="mx-auto max-w-7xl px-4 pt-4 md:pt-6">
       <h1 className="sr-only">Mughal Treasure Tech — Electronics and Kids Items in Pakistan</h1>
       <div className="relative overflow-hidden rounded-3xl bg-cream">
         <div className="relative aspect-[2/1]">
-          {banners.map((b, idx) => (
-            <Link
-              key={b.image}
-              to="/shop"
-              search={b.search}
-              className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
-              aria-hidden={idx !== i}
-              tabIndex={idx === i ? 0 : -1}
-            >
-              <img src={img(b.image, 1600)} alt={b.alt} className="h-full w-full object-cover" fetchPriority={idx === 0 ? 'high' : 'auto'} />
-            </Link>
-          ))}
+          {slides.map((b, idx) =>
+            b.text ? (
+              <div key={b.image} className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`} aria-hidden={idx !== i}>
+                <BismillahSlide />
+              </div>
+            ) : (
+              <Link
+                key={b.image}
+                to="/shop"
+                search={b.search}
+                className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+                aria-hidden={idx !== i}
+                tabIndex={idx === i ? 0 : -1}
+              >
+                <img src={img(b.image, 1600)} alt={b.alt} className="h-full w-full object-cover" fetchPriority={idx === 1 ? 'high' : 'auto'} />
+              </Link>
+            ),
+          )}
         </div>
         <button type="button" onClick={() => go(-1)} className="absolute left-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-black/25 text-white backdrop-blur hover:bg-black/40" aria-label="Previous banner">
           <ChevronLeft className="h-5 w-5" />
@@ -51,7 +80,7 @@ function Hero() {
           <ChevronRight className="h-5 w-5" />
         </button>
         <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">
-          {banners.map((b, idx) => (
+          {slides.map((b, idx) => (
             <button key={b.image} type="button" onClick={() => setI(idx)} className={`h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-white' : 'w-2 bg-white/60'}`} aria-label={`Show banner ${idx + 1}`} />
           ))}
         </div>
