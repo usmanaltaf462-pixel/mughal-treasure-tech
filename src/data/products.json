@@ -1,5 +1,32 @@
 [
   {
+    "id": "p-1795420075812",
+    "slug": "true-wireless-bluetooth-headset-u39-r8ro",
+    "name": "True Wireless Bluetooth Headset U39",
+    "nameUr": "True Wireless Bluetooth Headset U39",
+    "categoryId": "c-electronics",
+    "images": [
+      "/img/true-wireless-bluetooth-headset-u39-r8ro-1.webp",
+      "/img/true-wireless-bluetooth-headset-u39-r8ro-2.webp"
+    ],
+    "shortDescription": "Enjoy wireless music and calls",
+    "description": "The True Wireless Bluetooth Headset is a compact and convenient way to enjoy your music and take calls on the go. With its sleek design and comfortable fit, this headset is perfect for anyone who wants to stay connected without the hassle of cords. The headset is easy to use and comes with a built-in microphone for clear phone calls.",
+    "highlights": [
+      "Wireless design",
+      "Comfortable to wear",
+      "Quick connection",
+      "Intuitive touch"
+    ],
+    "price": 1800,
+    "salePrice": 1600,
+    "stock": 20,
+    "rating": 0,
+    "reviews": 0,
+    "featured": true,
+    "isNew": true,
+    "createdAt": "2026-11-23"
+  },
+  {
     "id": "p-1795367708993",
     "slug": "a6s-tws-earbuds-ku9t",
     "name": "A6S TWS EARBUDS",
