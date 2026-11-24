@@ -31,11 +31,12 @@ function Admin() {
   const [stock, setStock] = useState('20')
   const [feat, setFeat] = useState(true)
   const [f, setF] = useState(empty)
-  const [tab, setTab] = useState<'products' | 'orders' | 'sales' | 'customers' | 'reviews'>('products')
+  const [tab, setTab] = useState<'products' | 'orders' | 'sales' | 'customers' | 'reviews' | 'visitors'>('products')
   const [orders, setOrders] = useState<P[] | null>(null)
   const [customers, setCustomers] = useState<P[] | null>(null)
   const [reviews, setReviews] = useState<P[] | null>(null)
   const [q, setQ] = useState('')
+  const [stats, setStats] = useState<P | null>(null)
 
   useEffect(() => { try { setKey(localStorage.getItem('adminKey') || '') } catch { /* ignore */ } }, [])
 
@@ -55,17 +56,19 @@ function Admin() {
     setBusy(false)
   }
   const login = () => run('Login ho raha hai…', async () => {
-    try { localStorage.setItem('adminKey', key) } catch { /* ignore */ }
+    try { localStorage.setItem('adminKey', key); localStorage.setItem('mt-owner', '1') } catch { /* ignore */ }
     setProducts(await api('/api/products')); setMsg('')
   })
   const loadOrders = () => run('Orders load ho rahe hain…', async () => { setOrders(await api('/api/orders')); setMsg('') })
   const loadCustomers = () => run('Customers load ho rahe hain…', async () => { setCustomers(await api('/api/customers')); setMsg('') })
   const loadReviews = () => run('Reviews load ho rahe hain…', async () => { setReviews(await api('/api/admin-reviews')); setMsg('') })
-  const go = (t: 'products' | 'orders' | 'sales' | 'customers' | 'reviews') => {
+  const loadStats = () => run('Visitors load ho rahe hain…', async () => { setStats(await api('/api/stats')); setMsg('') })
+  const go = (t: 'products' | 'orders' | 'sales' | 'customers' | 'reviews' | 'visitors') => {
     setTab(t)
     if (t === 'orders' || t === 'sales') loadOrders()
     if (t === 'customers') loadCustomers()
     if (t === 'reviews') loadReviews()
+    if (t === 'visitors') loadStats()
   }
   const reviewStatus = (r: P, status: string) => run('Update ho raha hai…', async () => {
     await api('/api/review-status', { id: r.id, status })
@@ -157,7 +160,7 @@ function Admin() {
       ) : (
         <>
           <div className="flex gap-2">
-            {(['products', 'orders', 'sales', 'customers', 'reviews'] as const).map((t) => (
+            {(['products', 'orders', 'sales', 'customers', 'reviews', 'visitors'] as const).map((t) => (
               <button key={t} onClick={() => go(t)} className={'rounded-full px-4 py-2 text-sm font-semibold capitalize ' + (tab === t ? 'bg-brand-500 text-white' : 'bg-black/5')}>{t}</button>
             ))}
           </div>
@@ -191,6 +194,50 @@ function Admin() {
               <div className="flex justify-between rounded-xl border border-black/10 p-3"><span>Kul · {live.length} orders</span><b>Rs {sum(live).toLocaleString()}</b></div>
               <h3 className="pt-2 font-semibold">Sab se zyada bikne wale</h3>
               {Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([n, q]) => <div key={n} className="flex justify-between text-sm"><span>{n}</span><span>{q} pcs</span></div>)}
+            </section>
+          )}
+          {tab === 'visitors' && stats && (
+            <section className="space-y-4">
+              <h2 className="font-bold">Visitors</h2>
+              <div className="grid grid-cols-2 gap-2">
+                {([['Aaj', stats.today], ['Pichle 7 din', stats.week], ['Pichle 30 din', stats.month]] as const).map(([l, d]) => (
+                  <div key={l} className="rounded-2xl border border-black/10 p-3">
+                    <div className="text-xs text-black/50">{l}</div>
+                    <div className="text-2xl font-bold">{d.v}</div>
+                    <div className="text-xs text-black/60">{d.u} alag visitors</div>
+                  </div>
+                ))}
+                <div className="rounded-2xl border border-black/10 p-3">
+                  <div className="text-xs text-black/50">Ab tak kul</div>
+                  <div className="text-2xl font-bold">{stats.total}</div>
+                  <div className="text-xs text-black/60">page views</div>
+                </div>
+              </div>
+              <div>
+                <h3 className="mb-2 text-sm font-semibold">Pichle 14 din (page views)</h3>
+                <div className="flex h-32 items-end gap-1">
+                  {stats.daily.map((d: P) => {
+                    const max = Math.max(1, ...stats.daily.map((x: P) => x.v))
+                    return (
+                      <div key={d.day} className="flex flex-1 flex-col items-center justify-end gap-1" title={`${d.day}: ${d.v} views, ${d.u} visitors`}>
+                        <span className="text-[10px] text-black/60">{d.v}</span>
+                        <div className="w-full rounded-t bg-brand-500" style={{ height: `${Math.max(4, (d.v / max) * 100)}%` }} />
+                        <span className="text-[10px] text-black/40">{d.day.slice(8)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+              {([['Sab se zyada dekhe gaye pages', stats.pages], ['Log kahan se aaye', stats.refs], ['Shehar', stats.cities], ['Device', stats.devices]] as const).map(([title, rows]) => (
+                <div key={title}>
+                  <h3 className="mb-1 text-sm font-semibold">{title} (30 din)</h3>
+                  {rows.length === 0 && <p className="text-sm text-black/50">Abhi data nahi.</p>}
+                  {rows.map((r: P) => (
+                    <div key={r.name} className="flex justify-between border-b border-black/5 py-1 text-sm"><span className="truncate pr-3">{r.name}</span><b>{r.v}</b></div>
+                  ))}
+                </div>
+              ))}
+              <p className="text-xs text-black/50">Aap ke apne phone ya browser ki visits (jis se admin mein login kiya) ginti mein nahi aati. Bots bhi nahi gine jate. Din Pakistan ke waqt ke mutabiq hai.</p>
             </section>
           )}
           {tab === 'customers' && (

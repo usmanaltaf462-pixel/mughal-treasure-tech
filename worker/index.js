@@ -46,11 +46,15 @@ async function hashIp(ip) {
   const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('mt-' + ip))
   return [...new Uint8Array(b)].slice(0, 8).map((x) => x.toString(16).padStart(2, '0')).join('')
 }
+const VISITS_SCHEMA = `CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, day TEXT NOT NULL, ts TEXT NOT NULL, path TEXT, visitor TEXT, ref TEXT, country TEXT, city TEXT, device TEXT)`
+const pkDay = (offsetMs = 0) => new Date(Date.now() + 5 * 3600e3 - offsetMs).toISOString().slice(0, 10) // Pakistan time (UTC+5)
 let ready = false
 async function ensure(env) {
   if (ready) return
   await env.DB.prepare(SCHEMA).run()
   await env.DB.prepare(REVIEWS_SCHEMA).run()
+  await env.DB.prepare(VISITS_SCHEMA).run()
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS visits_day ON visits(day)').run()
   try { await env.DB.prepare('ALTER TABLE orders ADD COLUMN tracking TEXT').run() } catch (e) { /* column already exists */ }
   ready = true
 }
@@ -182,6 +186,24 @@ export default {
         return json({ ok: true })
       } catch (e) { return json({ error: 'Kuch masla aa gaya, dobara try karein.' }, 400) }
     }
+    if (url.pathname === '/api/hit' && req.method === 'POST') {
+      try {
+        const ua = req.headers.get('user-agent') || ''
+        if (/bot|crawl|spider|preview|facebookexternalhit|whatsapp|curl|python|headless/i.test(ua)) return json({ ok: true })
+        const b = await req.json()
+        const path = str(b.path, 120)
+        if (!path.startsWith('/') || path.startsWith('/admin') || path.startsWith('/api')) return json({ ok: true })
+        await ensure(env)
+        const day = pkDay()
+        const visitor = await hashIp((req.headers.get('cf-connecting-ip') || '') + '|' + ua + '|' + day)
+        let ref = ''
+        try { const h = new URL(String(b.ref || '')).hostname.replace(/^www\./, ''); if (h && h !== url.hostname) ref = h } catch (e) { /* no referrer */ }
+        const cf = req.cf || {}
+        const device = /mobile|android|iphone|ipad/i.test(ua) ? 'Mobile' : 'Desktop'
+        await env.DB.prepare('INSERT INTO visits (day, ts, path, visitor, ref, country, city, device) VALUES (?,?,?,?,?,?,?,?)').bind(day, new Date().toISOString(), path, visitor, ref, str(cf.country, 8), str(cf.city, 60), device).run()
+      } catch (e) { /* never break the site for a counter */ }
+      return json({ ok: true })
+    }
     if (!env.ADMIN_PASSWORD || !env.GITHUB_TOKEN) return json({ error: 'Server is not set up yet (missing secrets).' }, 500)
     if (!same(req.headers.get('x-admin-key') || '', env.ADMIN_PASSWORD)) {
       await new Promise((r) => setTimeout(r, 800))
@@ -189,6 +211,24 @@ export default {
     }
     try {
       if (url.pathname === '/api/products' && req.method === 'GET') return json(await getProducts(env))
+      if (url.pathname === '/api/stats' && req.method === 'GET') {
+        await ensure(env)
+        const today = pkDay(), d7 = pkDay(6 * 864e5), d30 = pkDay(29 * 864e5), d14 = pkDay(13 * 864e5)
+        const q = (sql, ...a) => env.DB.prepare(sql).bind(...a)
+        const [t, w, m, all, daily, pages, refs, cities, devs] = await env.DB.batch([
+          q('SELECT COUNT(*) AS v, COUNT(DISTINCT visitor) AS u FROM visits WHERE day = ?', today),
+          q('SELECT COUNT(*) AS v, COUNT(DISTINCT visitor) AS u FROM visits WHERE day >= ?', d7),
+          q('SELECT COUNT(*) AS v, COUNT(DISTINCT visitor) AS u FROM visits WHERE day >= ?', d30),
+          q('SELECT COUNT(*) AS v FROM visits'),
+          q('SELECT day, COUNT(*) AS v, COUNT(DISTINCT visitor) AS u FROM visits WHERE day >= ? GROUP BY day ORDER BY day', d14),
+          q('SELECT path AS name, COUNT(*) AS v FROM visits WHERE day >= ? GROUP BY path ORDER BY v DESC LIMIT 10', d30),
+          q("SELECT CASE WHEN ref = '' THEN 'Direct / WhatsApp' ELSE ref END AS name, COUNT(*) AS v FROM visits WHERE day >= ? GROUP BY name ORDER BY v DESC LIMIT 8", d30),
+          q("SELECT CASE WHEN city = '' THEN 'Unknown' ELSE city END AS name, COUNT(*) AS v FROM visits WHERE day >= ? GROUP BY name ORDER BY v DESC LIMIT 8", d30),
+          q('SELECT device AS name, COUNT(*) AS v FROM visits WHERE day >= ? GROUP BY device ORDER BY v DESC', d30),
+        ])
+        const one = (r) => r.results[0] || { v: 0, u: 0 }
+        return json({ today: one(t), week: one(w), month: one(m), total: one(all).v, daily: daily.results, pages: pages.results, refs: refs.results, cities: cities.results, devices: devs.results })
+      }
       if (url.pathname === '/api/customers' && req.method === 'GET') {
         await ensure(env)
         const { results } = await env.DB.prepare("SELECT MAX(phone) AS phone, MAX(name) AS name, MAX(city) AS city, MAX(address) AS address, COUNT(*) AS orders, SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END) AS spent, MAX(created_at) AS last_order FROM orders GROUP BY substr(replace(replace(replace(replace(phone, ' ', ''), '-', ''), '+', ''), '.', ''), -10) ORDER BY last_order DESC LIMIT 1000").all()
