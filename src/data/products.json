@@ -1,5 +1,33 @@
 [
   {
+    "id": "p-1795523520500",
+    "slug": "usb-c-to-usb-a-cable-cf78",
+    "name": "USB-C to USB-A Cable",
+    "nameUr": "USB-C to USB-A Cable",
+    "categoryId": "c-electronics",
+    "images": [
+      "/img/usb-c-to-usb-a-cable-cf78-1.webp",
+      "/img/usb-c-to-usb-a-cable-cf78-2.webp",
+      "/img/usb-c-to-usb-a-cable-cf78-3.webp"
+    ],
+    "shortDescription": "Fast charging cable",
+    "description": "This USB-C to USB-A cable is perfect for charging your devices quickly. It's made of durable material and has a length of 66W. The cable is designed to provide fast charging for your devices.",
+    "highlights": [
+      "Fast charging",
+      "Durable material",
+      "66W",
+      "Perfect for charging devices"
+    ],
+    "price": 350,
+    "salePrice": 250,
+    "stock": 20,
+    "rating": 0,
+    "reviews": 0,
+    "featured": true,
+    "isNew": true,
+    "createdAt": "2026-11-24"
+  },
+  {
     "id": "p-1795420075812",
     "slug": "true-wireless-bluetooth-headset-u39-r8ro",
     "name": "True Wireless Bluetooth Headset U39",
