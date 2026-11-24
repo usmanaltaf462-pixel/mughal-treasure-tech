@@ -5,10 +5,10 @@ import { SITE, waLink } from '@/lib/site'
 import { Logo } from './Logo'
 
 const perks = [
-  { icon: Banknote, title: 'Cash on Delivery', ur: 'ڈیلیوری پر ادائیگی', text: 'Pay when your parcel arrives' },
-  { icon: Truck, title: 'Nationwide Delivery', ur: 'پورے پاکستان میں', text: '2–5 working days' },
-  { icon: RotateCcw, title: '7-Day Easy Returns', ur: 'آسان واپسی', text: 'Hassle-free exchanges' },
-  { icon: ShieldCheck, title: 'Quality Assured', ur: 'معیار کی ضمانت', text: 'Genuine, tested products' },
+  { icon: Banknote, image: '/img/perk-cod.webp', title: 'Cash on Delivery', ur: 'ڈیلیوری پر ادائیگی', text: 'Pay when your parcel arrives' },
+  { icon: Truck, image: '/img/perk-delivery.webp', title: 'Nationwide Delivery', ur: 'پورے پاکستان میں', text: '2–5 working days' },
+  { icon: RotateCcw, image: '/img/perk-returns.webp', title: '7-Day Easy Returns', ur: 'آسان واپسی', text: 'Hassle-free exchanges' },
+  { icon: ShieldCheck, image: '/img/perk-quality.webp', title: 'Quality Assured', ur: 'معیار کی ضمانت', text: 'Genuine, tested products' },
 ]
 
 const PERK_COLORS: Array<[string, string]> = [
@@ -29,7 +29,7 @@ export function Perks() {
         >
           <p.icon className="pointer-events-none absolute -bottom-5 -right-5 h-24 w-24 rotate-12 text-white/15 transition duration-300 group-hover:rotate-0 sm:h-28 sm:w-28" />
           <span className="pointer-events-none absolute -left-7 -top-7 h-20 w-20 rounded-full bg-white/10" />
-          <span className="pointer-events-none absolute right-6 top-4 h-2 w-2 rounded-full bg-white/50" />
+          <img src={p.image} alt="" loading="lazy" className="absolute right-3 top-3 h-[72px] w-[72px] rounded-full object-cover shadow-lg ring-4 ring-white/70 sm:right-4 sm:top-4 sm:h-24 sm:w-24" />
           <span className="relative grid h-11 w-11 place-items-center rounded-2xl bg-white/20 ring-1 ring-white/40 backdrop-blur">
             <p.icon className="h-6 w-6" />
           </span>

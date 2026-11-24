@@ -396,7 +396,7 @@
     "stock": 25,
     "rating": 4.5,
     "reviews": 76,
-    "featured": false,
+    "featured": true,
     "isNew": false,
     "createdAt": "2026-11-18"
   },
@@ -422,7 +422,7 @@
     "stock": 25,
     "rating": 4.6,
     "reviews": 83,
-    "featured": false,
+    "featured": true,
     "isNew": true,
     "createdAt": "2026-11-19"
   }

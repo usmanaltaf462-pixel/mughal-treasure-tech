@@ -75,7 +75,10 @@ function SectionTitle({ title, ur, to }: { title: string; ur: string; to?: React
 }
 
 function Home() {
-  const featured = products.filter((p) => p.featured)
+  // Mix featured products from every category so Kids Items always show up next to Electronics.
+  const byCat = categories.map((c) => products.filter((p) => p.categoryId === c.id && p.featured))
+  const featured: typeof products = []
+  for (let n = 0; n < 8; n++) for (const list of byCat) if (list[n]) featured.push(list[n])
   const newArrivals = [...products].filter((p) => p.isNew).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   const deals = products.filter((p) => p.salePrice).slice(0, 4)
 
