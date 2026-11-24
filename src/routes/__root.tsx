@@ -1,3 +1,4 @@
+import { SITE } from '@/lib/site'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { CartProvider } from '@/lib/cart'
 
@@ -18,7 +19,11 @@ export const Route = createRootRoute({
       { property: 'og:title', content: siteName },
       { property: 'og:description', content: siteDescription },
       { property: 'og:type', content: 'website' },
-      { property: 'og:image', content: '/img/hero-main.webp' },
+      { property: 'og:image', content: `${SITE.url}/img/og-image.jpg` },
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '630' },
+      { property: 'og:site_name', content: 'Mughal Treasure Tech' },
+      { property: 'og:url', content: SITE.url },
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
     links: [

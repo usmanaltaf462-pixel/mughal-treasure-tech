@@ -1,5 +1,6 @@
 // Change these in ONE place — used by header, footer, WhatsApp button and Contact page.
 export const SITE = {
+  url: 'https://mughal-treasure-tech.usmanaltaf462.workers.dev', // change this if the web address changes
   name: 'Mughal Treasure Tech',
   whatsapp: '923078867068', // 92 + number without leading 0
   phoneDisplay: '0307 8867068',

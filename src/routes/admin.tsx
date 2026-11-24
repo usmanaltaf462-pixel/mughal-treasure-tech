@@ -29,6 +29,7 @@ function Admin() {
   const [price, setPrice] = useState('')
   const [sale, setSale] = useState('')
   const [stock, setStock] = useState('20')
+  const [feat, setFeat] = useState(true)
   const [f, setF] = useState(empty)
   const [tab, setTab] = useState<'products' | 'orders' | 'sales' | 'customers' | 'reviews'>('products')
   const [orders, setOrders] = useState<P[] | null>(null)
@@ -127,13 +128,14 @@ function Admin() {
       shortDescription: f.shortDescription, description: f.description,
       highlights: f.highlights.split('\n').map((s) => s.trim()).filter(Boolean),
       price: Number(price), salePrice: sale ? Number(sale) : null, stock: Number(stock) || 0,
-      rating: 0, reviews: 0, featured: true, isNew: true, createdAt: new Date().toISOString().slice(0, 10),
+      rating: 0, reviews: 0, featured: feat, isNew: true, createdAt: new Date().toISOString().slice(0, 10),
     }
     commit([p, ...(products || [])], images, 'Publish ho gaya! 1-2 minute mein site par nazar aayega.').then(() => {
-      setImgs([]); setF(empty); setPrice(''); setSale('')
+      setImgs([]); setF(empty); setPrice(''); setSale(''); setFeat(true)
     })
   }
   const del = (p: P) => confirm(`"${p.name}" delete karein?`) && commit((products || []).filter((x) => x.id !== p.id), {}, 'Delete ho gaya (1-2 minute mein site se hat jayega).')
+  const toggleFeatured = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, featured: !x.featured } : x)), {}, p.featured ? 'Featured se hata diya (1-2 minute mein).' : 'Featured mein add ho gaya (1-2 minute mein).')
   const toggleHide = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, hidden: !x.hidden } : x)), {}, p.hidden ? 'Product dobara dikhne laga (1-2 minute mein).' : 'Product hide ho gaya (1-2 minute mein store se hat jayega).')
   const edit = (p: P) => {
     const np = prompt(`${p.name}\nNayi qeemat:`, String(p.price)); if (np === null) return
@@ -247,6 +249,7 @@ function Admin() {
             <input className={inp} placeholder="Chhoti description" value={f.shortDescription} onChange={(e) => setF({ ...f, shortDescription: e.target.value })} />
             <textarea className={inp} rows={4} placeholder="Description" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
             <textarea className={inp} rows={4} placeholder="Features (har line mein ek)" value={f.highlights} onChange={(e) => setF({ ...f, highlights: e.target.value })} />
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={feat} onChange={(e) => setFeat(e.target.checked)} /> Home page par Featured mein dikhayen</label>
             <button className={btn} disabled={busy} onClick={publish}>Publish</button>
           </section>
           <section className="space-y-2">
@@ -254,9 +257,10 @@ function Admin() {
             {products.map((p) => (
               <div key={p.id} className={'flex items-center gap-3 rounded-xl border border-black/10 p-2 ' + (p.hidden ? 'opacity-50' : '')}>
                 <img src={p.images[0]} alt="" className="h-14 w-14 rounded-lg object-cover" />
-                <div className="min-w-0 flex-1 text-sm"><div className="truncate font-semibold">{p.name}</div><div>Rs {p.salePrice || p.price} · stock {p.stock}{p.hidden ? ' · HIDDEN' : ''}</div></div>
+                <div className="min-w-0 flex-1 text-sm"><div className="truncate font-semibold">{p.name}</div><div>Rs {p.salePrice || p.price} · stock {p.stock}{p.featured ? ' · ★' : ''}{p.hidden ? ' · HIDDEN' : ''}</div></div>
                 <button className="text-sm font-semibold text-brand-600" disabled={busy} onClick={() => edit(p)}>Edit</button>
                 <button className="text-sm font-semibold text-black/60" disabled={busy} onClick={() => toggleHide(p)}>{p.hidden ? 'Show' : 'Hide'}</button>
+                <button className="text-sm font-semibold text-amber-600" disabled={busy} onClick={() => toggleFeatured(p)}>{p.featured ? 'Unfeature' : 'Feature'}</button>
                 <button className="text-sm font-semibold text-red-600" disabled={busy} onClick={() => del(p)}>Delete</button>
               </div>
             ))}

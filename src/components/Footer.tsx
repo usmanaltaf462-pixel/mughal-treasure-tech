@@ -68,6 +68,7 @@ export function Footer() {
           <h3 className="mb-4 font-semibold text-white">Customer Care</h3>
           <ul className="space-y-2 text-sm">
             <li><Link to="/track" className="hover:text-brand-400">Track Order</Link></li>
+            <li><Link to="/faq" className="hover:text-brand-400">How to Order &amp; FAQ</Link></li>
             <li><Link to="/about" className="hover:text-brand-400">About Us</Link></li>
             <li><Link to="/contact" className="hover:text-brand-400">Contact Us</Link></li>
             <li><Link to="/shipping-returns" className="hover:text-brand-400">Shipping &amp; Returns</Link></li>

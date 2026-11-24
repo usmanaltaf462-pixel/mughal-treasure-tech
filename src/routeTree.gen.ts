@@ -16,6 +16,7 @@ import { Route as StoreAboutRouteImport } from './routes/_store/about'
 import { Route as StoreCartRouteImport } from './routes/_store/cart'
 import { Route as StoreCheckoutRouteImport } from './routes/_store/checkout'
 import { Route as StoreContactRouteImport } from './routes/_store/contact'
+import { Route as StoreFaqRouteImport } from './routes/_store/faq'
 import { Route as StorePrivacyRouteImport } from './routes/_store/privacy'
 import { Route as StoreShippingReturnsRouteImport } from './routes/_store/shipping-returns'
 import { Route as StoreShopRouteImport } from './routes/_store/shop'
@@ -57,6 +58,11 @@ const StoreContactRoute = StoreContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => StoreRoute,
 } as any)
+const StoreFaqRoute = StoreFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => StoreRoute,
+} as any)
 const StorePrivacyRoute = StorePrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof StoreCartRoute
   '/checkout': typeof StoreCheckoutRoute
   '/contact': typeof StoreContactRoute
+  '/faq': typeof StoreFaqRoute
   '/privacy': typeof StorePrivacyRoute
   '/shipping-returns': typeof StoreShippingReturnsRoute
   '/shop': typeof StoreShopRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/cart': typeof StoreCartRoute
   '/checkout': typeof StoreCheckoutRoute
   '/contact': typeof StoreContactRoute
+  '/faq': typeof StoreFaqRoute
   '/privacy': typeof StorePrivacyRoute
   '/shipping-returns': typeof StoreShippingReturnsRoute
   '/shop': typeof StoreShopRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/_store/cart': typeof StoreCartRoute
   '/_store/checkout': typeof StoreCheckoutRoute
   '/_store/contact': typeof StoreContactRoute
+  '/_store/faq': typeof StoreFaqRoute
   '/_store/privacy': typeof StorePrivacyRoute
   '/_store/shipping-returns': typeof StoreShippingReturnsRoute
   '/_store/shop': typeof StoreShopRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/faq'
     | '/privacy'
     | '/shipping-returns'
     | '/shop'
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/faq'
     | '/privacy'
     | '/shipping-returns'
     | '/shop'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/_store/cart'
     | '/_store/checkout'
     | '/_store/contact'
+    | '/_store/faq'
     | '/_store/privacy'
     | '/_store/shipping-returns'
     | '/_store/shop'
@@ -234,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreContactRouteImport
       parentRoute: typeof StoreRoute
     }
+    '/_store/faq': {
+      id: '/_store/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof StoreFaqRouteImport
+      parentRoute: typeof StoreRoute
+    }
     '/_store/privacy': {
       id: '/_store/privacy'
       path: '/privacy'
@@ -284,6 +303,7 @@ interface StoreRouteChildren {
   StoreCartRoute: typeof StoreCartRoute
   StoreCheckoutRoute: typeof StoreCheckoutRoute
   StoreContactRoute: typeof StoreContactRoute
+  StoreFaqRoute: typeof StoreFaqRoute
   StorePrivacyRoute: typeof StorePrivacyRoute
   StoreShippingReturnsRoute: typeof StoreShippingReturnsRoute
   StoreShopRoute: typeof StoreShopRoute
@@ -298,6 +318,7 @@ const StoreRouteChildren: StoreRouteChildren = {
   StoreCartRoute: StoreCartRoute,
   StoreCheckoutRoute: StoreCheckoutRoute,
   StoreContactRoute: StoreContactRoute,
+  StoreFaqRoute: StoreFaqRoute,
   StorePrivacyRoute: StorePrivacyRoute,
   StoreShippingReturnsRoute: StoreShippingReturnsRoute,
   StoreShopRoute: StoreShopRoute,

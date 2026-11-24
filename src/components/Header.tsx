@@ -178,6 +178,7 @@ export function Header() {
               ))}
               <p className="mt-4 px-3 text-xs font-bold uppercase tracking-wider text-ink/40">Help</p>
               <Link to="/track" onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-2.5 font-medium hover:bg-brand-50">Track Order</Link>
+              <Link to="/faq" onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-2.5 font-medium hover:bg-brand-50">How to Order &amp; FAQ</Link>
               <Link to="/about" onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-2.5 font-medium hover:bg-brand-50">About Us</Link>
               <Link to="/contact" onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-2.5 font-medium hover:bg-brand-50">Contact Us</Link>
               <Link to="/shipping-returns" onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-2.5 font-medium hover:bg-brand-50">Shipping &amp; Returns</Link>
