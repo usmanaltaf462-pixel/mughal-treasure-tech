@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { SITE } from '@/lib/site'
 
 export const Route = createFileRoute('/admin')({
   head: () => ({ meta: [{ title: 'Admin — Mughal Treasure Tech' }, { name: 'robots', content: 'noindex,nofollow' }] }),
@@ -8,6 +9,83 @@ export const Route = createFileRoute('/admin')({
 
 type P = Record<string, any>
 const empty = { name: '', nameUr: '', shortDescription: '', description: '', highlights: '' }
+
+// ---------- Share card (WhatsApp Status / Facebook post) ----------
+const loadImg = (src: string) => new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src })
+const money = (n: number) => 'Rs ' + Number(n).toLocaleString('en-PK')
+type Fmt = 'square' | 'story'
+const LAYOUT = {
+  square: { W: 1080, H: 1080, hh: 110, photoY: 135, photoH: 500, photoW: 860, nameFont: 54, nameY: 692, nameLH: 62, priceFont: 100, priceY: 862, pillY: 886, pillH: 52, pillFont: 28, extraY: 0, footY: 980, footFont: 44 },
+  story: { W: 1080, H: 1920, hh: 160, photoY: 210, photoH: 800, photoW: 900, nameFont: 76, nameY: 1125, nameLH: 90, priceFont: 150, priceY: 1400, pillY: 1440, pillH: 72, pillFont: 38, extraY: 1620, footY: 1740, footFont: 56 },
+}
+function rr(x: CanvasRenderingContext2D, px: number, py: number, w: number, h: number, r: number) {
+  x.beginPath(); x.moveTo(px + r, py); x.arcTo(px + w, py, px + w, py + h, r); x.arcTo(px + w, py + h, px, py + h, r); x.arcTo(px, py + h, px, py, r); x.arcTo(px, py, px + w, py, r); x.closePath()
+}
+function wrapText(x: CanvasRenderingContext2D, text: string, maxW: number, maxLines: number) {
+  const words = text.split(/\s+/); const lines: string[] = []; let cur = ''
+  for (const w of words) {
+    const t = cur ? cur + ' ' + w : w
+    if (x.measureText(t).width <= maxW || !cur) cur = t
+    else { lines.push(cur); cur = w }
+  }
+  if (cur) lines.push(cur)
+  if (lines.length > maxLines) { const keep = lines.slice(0, maxLines); keep[maxLines - 1] = keep[maxLines - 1].replace(/\s+\S*$/, '') + '…'; return keep }
+  return lines
+}
+async function makeCard(p: P, fmt: Fmt): Promise<Blob> {
+  const L = LAYOUT[fmt]; const c = document.createElement('canvas'); c.width = L.W; c.height = L.H
+  const x = c.getContext('2d')!; const cx = L.W / 2; const FONT = 'Arial, Helvetica, sans-serif'
+  const bg = x.createLinearGradient(0, 0, 0, L.H); bg.addColorStop(0, '#fff7ed'); bg.addColorStop(1, '#ffe8cc'); x.fillStyle = bg; x.fillRect(0, 0, L.W, L.H)
+  x.fillStyle = '#f47721'; x.fillRect(0, 0, L.W, L.hh)
+  const r = L.hh * 0.36
+  x.fillStyle = '#fff'; x.beginPath(); x.arc(L.hh * 0.62, L.hh / 2, r, 0, Math.PI * 2); x.fill()
+  try { const lg = await loadImg('/logo.webp'); x.drawImage(lg, L.hh * 0.62 - r * 0.9, L.hh / 2 - r * 0.9, r * 1.8, r * 1.8) } catch { /* logo optional */ }
+  x.fillStyle = '#fff'; x.textBaseline = 'middle'; x.textAlign = 'left'
+  let hf = L.hh * 0.36; x.font = `800 ${hf}px ${FONT}`; const hx = L.hh * 1.15
+  while (x.measureText('MUGHAL TREASURE TECH').width > L.W - hx - 30) { hf -= 2; x.font = `800 ${hf}px ${FONT}` }
+  x.fillText('MUGHAL TREASURE TECH', hx, L.hh / 2)
+  // photo card
+  const px = (L.W - L.photoW) / 2
+  x.save(); x.shadowColor = 'rgba(20,33,61,.25)'; x.shadowBlur = 40; x.shadowOffsetY = 12; x.fillStyle = '#fff'; rr(x, px, L.photoY, L.photoW, L.photoH, 36); x.fill(); x.restore()
+  try {
+    const im = await loadImg(p.images[0]); const pad = 26; const bw = L.photoW - pad * 2; const bh = L.photoH - pad * 2
+    const k = Math.min(bw / im.naturalWidth, bh / im.naturalHeight); const w = im.naturalWidth * k; const h = im.naturalHeight * k
+    x.save(); rr(x, px + 8, L.photoY + 8, L.photoW - 16, L.photoH - 16, 30); x.clip(); x.drawImage(im, px + (L.photoW - w) / 2, L.photoY + (L.photoH - h) / 2, w, h); x.restore()
+  } catch { /* photo missing */ }
+  const price = Number(p.salePrice || p.price); const old = p.salePrice && Number(p.price) > Number(p.salePrice) ? Number(p.price) : 0
+  if (old) {
+    const off = Math.round((1 - price / old) * 100); const bw = L.W * 0.2; const bh = L.W * 0.075
+    x.fillStyle = '#16a34a'; rr(x, px + L.photoW - bw - 24, L.photoY + 24, bw, bh, bh / 2); x.fill()
+    x.fillStyle = '#fff'; x.textAlign = 'center'; x.font = `800 ${bh * 0.5}px ${FONT}`; x.fillText(`${off}% OFF`, px + L.photoW - bw / 2 - 24, L.photoY + 24 + bh / 2)
+  }
+  // name
+  x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillStyle = '#14213d'; x.font = `800 ${L.nameFont}px ${FONT}`
+  wrapText(x, String(p.name), L.W - 120, 2).forEach((ln, i) => x.fillText(ln, cx, L.nameY + i * L.nameLH))
+  // price (and old price next to it)
+  x.font = `900 ${L.priceFont}px ${FONT}`; const pt = money(price); const pw = x.measureText(pt).width
+  let ow = 0; const of = L.priceFont * 0.42; const ot = old ? money(old) : ''
+  if (old) { x.font = `700 ${of}px ${FONT}`; ow = x.measureText(ot).width + 28 }
+  const sx = cx - (pw + ow) / 2
+  x.textAlign = 'left'; x.fillStyle = '#f47721'; x.font = `900 ${L.priceFont}px ${FONT}`; x.fillText(pt, sx, L.priceY)
+  if (old) { x.fillStyle = '#7a8497'; x.font = `700 ${of}px ${FONT}`; const ox = sx + pw + 28; x.fillText(ot, ox, L.priceY); x.fillRect(ox, L.priceY - of * 0.32, x.measureText(ot).width, 4) }
+  // Cash on delivery pill
+  x.textAlign = 'center'; x.textBaseline = 'middle'; const pillText = 'CASH ON DELIVERY  •  ALL OVER PAKISTAN'; x.font = `800 ${L.pillFont}px ${FONT}`
+  const pwid = x.measureText(pillText).width + 60; x.fillStyle = '#14213d'; rr(x, cx - pwid / 2, L.pillY, pwid, L.pillH, L.pillH / 2); x.fill(); x.fillStyle = '#fff'; x.fillText(pillText, cx, L.pillY + L.pillH / 2 + 2)
+  if (L.extraY) { x.fillStyle = '#14213d'; x.font = `700 40px ${FONT}`; x.fillText('Delivery 2–5 working days  •  7-day easy returns', cx, L.extraY) }
+  // footer
+  x.fillStyle = '#14213d'; x.fillRect(0, L.footY, L.W, L.H - L.footY)
+  x.fillStyle = '#fff'; x.font = `800 ${L.footFont}px ${FONT}`; x.fillText(`Order on WhatsApp: ${SITE.phoneDisplay}`, cx, L.footY + (L.H - L.footY) / 2)
+  return await new Promise<Blob>((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('Image nahi bani'))), 'image/jpeg', 0.92))
+}
+function makeCaption(p: P) {
+  const price = Number(p.salePrice || p.price); const old = p.salePrice && Number(p.price) > Number(p.salePrice) ? Number(p.price) : 0
+  return [
+    `🔥 ${p.name}`, p.shortDescription ? `✨ ${p.shortDescription}` : '',
+    `💰 Price: ${money(price)}${old ? ` (pehle ${money(old)})` : ''}`,
+    '✅ Cash on Delivery — poore Pakistan mein', '🚚 Delivery 2–5 working days',
+    `📲 Order karein WhatsApp par: ${SITE.phoneDisplay}`, `🛒 ${location.origin}/product/${p.slug}`,
+  ].filter(Boolean).join('\n')
+}
 
 async function shrink(file: File): Promise<string> {
   const bmp = await createImageBitmap(file)
@@ -37,6 +115,11 @@ function Admin() {
   const [reviews, setReviews] = useState<P[] | null>(null)
   const [q, setQ] = useState('')
   const [stats, setStats] = useState<P | null>(null)
+  const [shareFor, setShareFor] = useState<P | null>(null)
+  const [fmt, setFmt] = useState<Fmt>('story')
+  const [shareImg, setShareImg] = useState('')
+  const [shareBlob, setShareBlob] = useState<Blob | null>(null)
+  const [caption, setCaption] = useState('')
 
   useEffect(() => { try { setKey(localStorage.getItem('adminKey') || '') } catch { /* ignore */ } }, [])
 
@@ -138,6 +221,27 @@ function Admin() {
     })
   }
   const del = (p: P) => confirm(`"${p.name}" delete karein?`) && commit((products || []).filter((x) => x.id !== p.id), {}, 'Delete ho gaya (1-2 minute mein site se hat jayega).')
+  useEffect(() => {
+    if (!shareFor) return
+    let dead = false; let url = ''
+    setShareImg(''); setShareBlob(null)
+    makeCard(shareFor, fmt).then((b) => { if (dead) return; url = URL.createObjectURL(b); setShareBlob(b); setShareImg(url) }).catch(() => setMsg('❌ Share image nahi ban saki.'))
+    return () => { dead = true; if (url) URL.revokeObjectURL(url) }
+  }, [shareFor, fmt])
+  const openShare = (p: P) => { setCaption(makeCaption(p)); setShareFor(p) }
+  const fileName = () => `${shareFor?.slug || 'product'}-${fmt}.jpg`
+  const downloadShare = () => { if (!shareImg) return; const a = document.createElement('a'); a.href = shareImg; a.download = fileName(); a.click() }
+  const copyCaption = async () => { try { await navigator.clipboard.writeText(caption); setMsg('✅ Caption copy ho gaya.') } catch { setMsg('Caption copy nahi hua, haath se copy kar lein.') } }
+  const doShare = async () => {
+    if (!shareBlob) return
+    const file = new File([shareBlob], fileName(), { type: 'image/jpeg' })
+    const nav = navigator as any
+    if (nav.canShare && nav.canShare({ files: [file] })) {
+      try { await nav.share({ files: [file], text: caption }); return } catch (e: any) { if (e?.name === 'AbortError') return }
+    }
+    downloadShare(); await copyCaption()
+    setMsg('Is browser mein direct share nahi hota: image download ho gayi aur caption copy ho gaya. WhatsApp ya Facebook mein jaa kar image lagayein aur caption paste karein.')
+  }
   const toggleFeatured = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, featured: !x.featured } : x)), {}, p.featured ? 'Featured se hata diya (1-2 minute mein).' : 'Featured mein add ho gaya (1-2 minute mein).')
   const toggleHide = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, hidden: !x.hidden } : x)), {}, p.hidden ? 'Product dobara dikhne laga (1-2 minute mein).' : 'Product hide ho gaya (1-2 minute mein store se hat jayega).')
   const edit = (p: P) => {
@@ -305,15 +409,44 @@ function Admin() {
               <div key={p.id} className={'flex items-center gap-3 rounded-xl border border-black/10 p-2 ' + (p.hidden ? 'opacity-50' : '')}>
                 <img src={p.images[0]} alt="" className="h-14 w-14 rounded-lg object-cover" />
                 <div className="min-w-0 flex-1 text-sm"><div className="truncate font-semibold">{p.name}</div><div>Rs {p.salePrice || p.price} · stock {p.stock}{p.featured ? ' · ★' : ''}{p.hidden ? ' · HIDDEN' : ''}</div></div>
+                <div className="flex max-w-[48%] flex-wrap justify-end gap-x-3 gap-y-1">
+                <button className="text-sm font-semibold text-green-700" onClick={() => openShare(p)}>Share</button>
                 <button className="text-sm font-semibold text-brand-600" disabled={busy} onClick={() => edit(p)}>Edit</button>
                 <button className="text-sm font-semibold text-black/60" disabled={busy} onClick={() => toggleHide(p)}>{p.hidden ? 'Show' : 'Hide'}</button>
                 <button className="text-sm font-semibold text-amber-600" disabled={busy} onClick={() => toggleFeatured(p)}>{p.featured ? 'Unfeature' : 'Feature'}</button>
                 <button className="text-sm font-semibold text-red-600" disabled={busy} onClick={() => del(p)}>Delete</button>
+                </div>
               </div>
             ))}
           </section>
           </>)}
         </>
+      )}
+      {shareFor && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 p-3 sm:items-center" onClick={() => setShareFor(null)}>
+          <div className="max-h-[92vh] w-full max-w-md space-y-3 overflow-auto rounded-3xl bg-white p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="truncate font-bold">Share: {shareFor.name}</h3>
+              <button className="text-3xl leading-none text-black/50" onClick={() => setShareFor(null)} aria-label="Band karein">×</button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {(['story', 'square'] as const).map((f) => (
+                <button key={f} onClick={() => setFmt(f)} className={'rounded-xl px-3 py-2 text-sm font-semibold ' + (fmt === f ? 'bg-brand-500 text-white' : 'bg-black/5')}>
+                  {f === 'story' ? 'WhatsApp Status (9:16)' : 'Facebook Post (1:1)'}
+                </button>
+              ))}
+            </div>
+            {shareImg ? <img src={shareImg} alt="Share preview" className="mx-auto max-h-[42vh] rounded-xl border border-black/10" /> : <p className="py-10 text-center text-sm text-black/50">Image ban rahi hai…</p>}
+            <textarea className={inp} rows={7} value={caption} onChange={(e) => setCaption(e.target.value)} />
+            <button className={btn + ' w-full'} disabled={!shareBlob} onClick={doShare}>Share karein (WhatsApp Status / Facebook)</button>
+            <div className="grid grid-cols-2 gap-2">
+              <button className="rounded-full bg-black/5 px-4 py-3 text-sm font-semibold" disabled={!shareImg} onClick={downloadShare}>Image download</button>
+              <button className="rounded-full bg-black/5 px-4 py-3 text-sm font-semibold" onClick={copyCaption}>Caption copy</button>
+            </div>
+            <a className="block rounded-full bg-[#1877f2] px-4 py-3 text-center text-sm font-semibold text-white" target="_blank" rel="noreferrer" href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(location.origin + '/product/' + shareFor.slug)}>Facebook par product ka link share karein</a>
+            <p className="text-xs text-black/50">Share dabane par phone ki share list khulti hai. WhatsApp chunein aur "My status" (status ke liye) ya kisi chat ko bhejein. Facebook app bhi list mein aati hai.</p>
+          </div>
+        </div>
       )}
       {msg && <p className="fixed inset-x-4 bottom-4 rounded-xl bg-ink p-3 text-center text-sm text-white">{msg}</p>}
     </div>
