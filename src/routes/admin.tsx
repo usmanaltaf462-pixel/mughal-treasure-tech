@@ -77,6 +77,27 @@ async function makeCard(p: P, fmt: Fmt): Promise<Blob> {
   x.fillStyle = '#fff'; x.font = `800 ${L.footFont}px ${FONT}`; x.fillText(`Order on WhatsApp: ${SITE.phoneDisplay}`, cx, L.footY + (L.H - L.footY) / 2)
   return await new Promise<Blob>((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('Image nahi bani'))), 'image/jpeg', 0.92))
 }
+const blobToB64 = (b: Blob) => new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(b) })
+// 1200x630 picture that WhatsApp / Facebook show as the link preview of a product.
+async function makeOgCard(p: P, photoSrc: string): Promise<Blob> {
+  const W = 1200, H = 630; const c = document.createElement('canvas'); c.width = W; c.height = H
+  const x = c.getContext('2d')!; const FONT = 'Arial, Helvetica, sans-serif'
+  x.fillStyle = '#fff0e0'; x.fillRect(0, 0, W, H); x.fillStyle = '#f47721'; x.fillRect(0, 0, W, 96)
+  x.fillStyle = '#fff'; x.beginPath(); x.arc(60, 48, 36, 0, Math.PI * 2); x.fill()
+  try { const lg = await loadImg('/logo.webp'); x.drawImage(lg, 29, 17, 62, 62) } catch { /* logo optional */ }
+  x.fillStyle = '#fff'; x.textBaseline = 'middle'; x.textAlign = 'left'; x.font = `800 38px ${FONT}`; x.fillText('MUGHAL TREASURE TECH', 118, 48)
+  x.fillStyle = '#fff'; rr(x, 40, 128, 540, 420, 30); x.fill()
+  try { const im = await loadImg(photoSrc); const k = Math.min(500 / im.naturalWidth, 380 / im.naturalHeight); const w = im.naturalWidth * k; const h = im.naturalHeight * k; x.drawImage(im, 40 + (540 - w) / 2, 128 + (420 - h) / 2, w, h) } catch { /* photo missing */ }
+  x.fillStyle = '#14213d'; x.textBaseline = 'alphabetic'; x.font = `800 54px ${FONT}`
+  let y = 190; wrapText(x, String(p.name), 560, 3).forEach((ln) => { x.fillText(ln, 620, y); y += 66 })
+  x.font = `800 26px ${FONT}`; let pill = 'CASH ON DELIVERY  •  ALL OVER PAKISTAN'; if (x.measureText(pill).width + 50 > 560) pill = 'CASH ON DELIVERY  •  PAKISTAN'
+  const pw = Math.min(560, x.measureText(pill).width + 50)
+  x.fillStyle = '#14213d'; rr(x, 620, y + 20, pw, 54, 27); x.fill(); x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(pill, 620 + pw / 2, y + 47)
+  x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillStyle = '#f47721'; x.font = `800 34px ${FONT}`; x.fillText('Order now on WhatsApp', 620, y + 120)
+  x.fillStyle = '#14213d'; x.fillRect(0, 570, W, 60); x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = `800 34px ${FONT}`; x.fillText(`WhatsApp: ${SITE.phoneDisplay}`, W / 2, 600)
+  return await new Promise<Blob>((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('Image nahi bani'))), 'image/jpeg', 0.9))
+}
+
 function makeCaption(p: P) {
   const price = Number(p.salePrice || p.price); const old = p.salePrice && Number(p.price) > Number(p.salePrice) ? Number(p.price) : 0
   return [
@@ -203,7 +224,7 @@ function Admin() {
       await api('/api/commit', { products: list, images })
       setProducts(list); setMsg('✅ ' + done)
     })
-  const publish = () => {
+  const publish = async () => {
     if (!imgs.length || !f.name || !price) return setMsg('Photo, naam aur qeemat zaroori hain.')
     const slug = f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) + '-' + Date.now().toString(36).slice(-4)
     const images: Record<string, string> = {}
@@ -216,6 +237,7 @@ function Admin() {
       price: Number(price), salePrice: sale ? Number(sale) : null, stock: Number(stock) || 0,
       rating: 0, reviews: 0, featured: feat, isNew: true, createdAt: new Date().toISOString().slice(0, 10),
     }
+    try { const ob = await makeOgCard(p, imgs[0]); images[`public/img/og-${slug}.jpg`] = await blobToB64(ob); p.og = `/img/og-${slug}.jpg` } catch { /* link preview picture is optional */ }
     commit([p, ...(products || [])], images, 'Publish ho gaya! 1-2 minute mein site par nazar aayega.').then(() => {
       setImgs([]); setF(empty); setPrice(''); setSale(''); setFeat(true)
     })
@@ -242,6 +264,20 @@ function Admin() {
     downloadShare(); await copyCaption()
     setMsg('Is browser mein direct share nahi hota: image download ho gayi aur caption copy ho gaya. WhatsApp ya Facebook mein jaa kar image lagayein aur caption paste karein.')
   }
+  const shareUrl = () => location.origin + '/product/' + shareFor?.slug
+  const shortText = () => { const pr = Number(shareFor?.salePrice || shareFor?.price); return `🔥 ${shareFor?.name} — ${money(pr)}\n✅ Cash on Delivery all over Pakistan` }
+  const shareLink = async () => {
+    const nav = navigator as any
+    if (nav.share) { try { await nav.share({ title: shareFor?.name, text: shortText(), url: shareUrl() }); return } catch (e: any) { if (e?.name === 'AbortError') return } }
+    try { await navigator.clipboard.writeText(shareUrl()); setMsg('✅ Product ka link copy ho gaya.') } catch { setMsg(shareUrl()) }
+  }
+  const shareSite = async () => {
+    const nav = navigator as any
+    const text = `🛍️ Mughal Treasure Tech — Electronics & Kids Items\n✅ Cash on Delivery all over Pakistan\n📲 WhatsApp: ${SITE.phoneDisplay}`
+    if (nav.share) { try { await nav.share({ title: 'Mughal Treasure Tech', text, url: location.origin }); return } catch (e: any) { if (e?.name === 'AbortError') return } }
+    try { await navigator.clipboard.writeText(location.origin); setMsg('✅ Website ka link copy ho gaya.') } catch { setMsg(location.origin) }
+  }
+  const copySite = async () => { try { await navigator.clipboard.writeText(location.origin); setMsg('✅ Website ka link copy ho gaya.') } catch { setMsg(location.origin) } }
   const toggleFeatured = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, featured: !x.featured } : x)), {}, p.featured ? 'Featured se hata diya (1-2 minute mein).' : 'Featured mein add ho gaya (1-2 minute mein).')
   const toggleHide = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, hidden: !x.hidden } : x)), {}, p.hidden ? 'Product dobara dikhne laga (1-2 minute mein).' : 'Product hide ho gaya (1-2 minute mein store se hat jayega).')
   const edit = (p: P) => {
@@ -263,7 +299,7 @@ function Admin() {
         </div>
       ) : (
         <>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {(['products', 'orders', 'sales', 'customers', 'reviews', 'visitors'] as const).map((t) => (
               <button key={t} onClick={() => go(t)} className={'rounded-full px-4 py-2 text-sm font-semibold capitalize ' + (tab === t ? 'bg-brand-500 text-white' : 'bg-black/5')}>{t}</button>
             ))}
@@ -300,6 +336,12 @@ function Admin() {
               {Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([n, q]) => <div key={n} className="flex justify-between text-sm"><span>{n}</span><span>{q} pcs</span></div>)}
             </section>
           )}
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-black/[0.03] p-2">
+            <span className="px-1 text-xs font-semibold text-black/60">Website:</span>
+            <button className="rounded-full bg-[#25D366] px-4 py-2 text-sm font-semibold text-white" onClick={shareSite}>Poori website share karein</button>
+            <a className="rounded-full bg-[#1877f2] px-4 py-2 text-sm font-semibold text-white" target="_blank" rel="noreferrer" href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(location.origin)}>Facebook</a>
+            <button className="rounded-full bg-black/10 px-4 py-2 text-sm font-semibold" onClick={copySite}>Link copy</button>
+          </div>
           {tab === 'visitors' && stats && (
             <section className="space-y-4">
               <h2 className="font-bold">Visitors</h2>
@@ -443,8 +485,10 @@ function Admin() {
               <button className="rounded-full bg-black/5 px-4 py-3 text-sm font-semibold" disabled={!shareImg} onClick={downloadShare}>Image download</button>
               <button className="rounded-full bg-black/5 px-4 py-3 text-sm font-semibold" onClick={copyCaption}>Caption copy</button>
             </div>
+            <button className="w-full rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white" onClick={shareLink}>Link share karein (tap karne par product khule)</button>
+            <a className="block rounded-full bg-[#128c7e] px-4 py-3 text-center text-sm font-semibold text-white" target="_blank" rel="noreferrer" href={'https://wa.me/?text=' + encodeURIComponent(shortText() + '\n' + shareUrl())}>WhatsApp par link bhejein</a>
             <a className="block rounded-full bg-[#1877f2] px-4 py-3 text-center text-sm font-semibold text-white" target="_blank" rel="noreferrer" href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(location.origin + '/product/' + shareFor.slug)}>Facebook par product ka link share karein</a>
-            <p className="text-xs text-black/50">Share dabane par phone ki share list khulti hai. WhatsApp chunein aur "My status" (status ke liye) ya kisi chat ko bhejein. Facebook app bhi list mein aati hai.</p>
+            <p className="text-xs text-black/50"><b>Link share</b> mein product ki tasveer aur naam ke saath ek card banta hai, jise dabane par seedha product ka page khulta hai. <b>Share karein</b> (tasveer wala) mein tasveer jati hai aur link caption mein hota hai. Share dabane par phone ki share list khulti hai. WhatsApp chunein aur "My status" (status ke liye) ya kisi chat ko bhejein. Facebook app bhi list mein aati hai.</p>
           </div>
         </div>
       )}

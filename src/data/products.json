@@ -25,7 +25,8 @@
     "reviews": 0,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-24"
+    "createdAt": "2026-11-24",
+    "og": "/img/og-usb-c-to-usb-a-cable-cf78.jpg"
   },
   {
     "id": "p-1795420075812",
@@ -52,7 +53,8 @@
     "reviews": 0,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-23"
+    "createdAt": "2026-11-23",
+    "og": "/img/og-true-wireless-bluetooth-headset-u39-r8ro.jpg"
   },
   {
     "id": "p-1795367708993",
@@ -80,7 +82,8 @@
     "reviews": 0,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-22"
+    "createdAt": "2026-11-22",
+    "og": "/img/og-a6s-tws-earbuds-ku9t.jpg"
   },
   {
     "id": "p-1795314331265",
@@ -108,7 +111,8 @@
     "reviews": 0,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-22"
+    "createdAt": "2026-11-22",
+    "og": "/img/og-trendy-wireless-earbuds-air31-srr4.jpg"
   },
   {
     "id": "p-1795286148245",
@@ -136,7 +140,8 @@
     "reviews": 0,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-21"
+    "createdAt": "2026-11-21",
+    "og": "/img/og-wireless-earbuds-0plf.jpg"
   },
   {
     "id": "p-2001",
@@ -191,7 +196,8 @@
     "reviews": 0,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-21"
+    "createdAt": "2026-11-21",
+    "og": "/img/og-m25-gaming-earbuds.jpg"
   },
   {
     "id": "p-1001",
@@ -218,7 +224,8 @@
     "reviews": 20,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-10"
+    "createdAt": "2026-11-10",
+    "og": "/img/og-wireless-earbuds-pro.jpg"
   },
   {
     "id": "p-1002",
@@ -245,7 +252,8 @@
     "reviews": 27,
     "featured": true,
     "isNew": false,
-    "createdAt": "2026-11-11"
+    "createdAt": "2026-11-11",
+    "og": "/img/og-bluetooth-neckband.jpg"
   },
   {
     "id": "p-1003",
@@ -271,7 +279,8 @@
     "reviews": 34,
     "featured": false,
     "isNew": false,
-    "createdAt": "2026-11-12"
+    "createdAt": "2026-11-12",
+    "og": "/img/og-20w-fast-charger.jpg"
   },
   {
     "id": "p-1004",
@@ -296,7 +305,8 @@
     "reviews": 41,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-13"
+    "createdAt": "2026-11-13",
+    "og": "/img/og-power-bank-10000.jpg"
   },
   {
     "id": "p-1005",
@@ -322,7 +332,8 @@
     "reviews": 48,
     "featured": true,
     "isNew": false,
-    "createdAt": "2026-11-14"
+    "createdAt": "2026-11-14",
+    "og": "/img/og-smart-watch-series.jpg"
   },
   {
     "id": "p-1006",
@@ -347,7 +358,8 @@
     "reviews": 55,
     "featured": false,
     "isNew": false,
-    "createdAt": "2026-11-15"
+    "createdAt": "2026-11-15",
+    "og": "/img/og-type-c-cable.jpg"
   },
   {
     "id": "p-1007",
@@ -373,7 +385,8 @@
     "reviews": 62,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-16"
+    "createdAt": "2026-11-16",
+    "og": "/img/og-kids-learning-toy-set.jpg"
   },
   {
     "id": "p-1008",
@@ -399,7 +412,8 @@
     "reviews": 69,
     "featured": true,
     "isNew": false,
-    "createdAt": "2026-11-17"
+    "createdAt": "2026-11-17",
+    "og": "/img/og-kids-rc-car.jpg"
   },
   {
     "id": "p-1009",
@@ -426,7 +440,8 @@
     "reviews": 76,
     "featured": true,
     "isNew": false,
-    "createdAt": "2026-11-18"
+    "createdAt": "2026-11-18",
+    "og": "/img/og-kids-school-backpack.jpg"
   },
   {
     "id": "p-1010",
@@ -452,6 +467,7 @@
     "reviews": 83,
     "featured": true,
     "isNew": true,
-    "createdAt": "2026-11-19"
+    "createdAt": "2026-11-19",
+    "og": "/img/og-kids-water-bottle.jpg"
   }
 ]

@@ -1,3 +1,4 @@
+import PRODUCTS from '../src/data/products.json'
 // Admin API for Mughal Treasure Tech. Runs only for /api/* requests.
 // Needs two secrets in Cloudflare: ADMIN_PASSWORD and GITHUB_TOKEN (Contents: read & write on this repo).
 const REPO = 'usmanaltaf462-pixel/mughal-treasure-tech'
@@ -140,9 +141,32 @@ async function describe(env, dataUrl, hint) {
   }
 }
 
+const esc = (v) => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+// Product links get their own title, description and picture, so WhatsApp / Facebook show a product card that opens the product when tapped.
+async function productPage(req, env, url) {
+  const slug = decodeURIComponent(url.pathname.split('/')[2] || '')
+  const p = PRODUCTS.find((x) => x.slug === slug && !x.hidden)
+  if (!p) return env.ASSETS.fetch(req)
+  const shell = await env.ASSETS.fetch(new Request(url.origin + '/'))
+  if (!shell.ok) return env.ASSETS.fetch(req)
+  const price = Number(p.salePrice || p.price).toLocaleString('en-PK')
+  const title = `${p.name} — Rs ${price} | Mughal Treasure Tech`
+  const desc = `${p.shortDescription || p.name} Cash on Delivery all over Pakistan.`
+  const image = url.origin + (p.og || '/img/og-image.jpg')
+  const tags = `<meta name="description" content="${esc(desc)}"><meta property="og:type" content="product"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:image" content="${esc(image)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:url" content="${esc(url.origin + '/product/' + p.slug)}"><meta property="og:site_name" content="Mughal Treasure Tech"><meta name="twitter:card" content="summary_large_image">`
+  return new HTMLRewriter()
+    .on('title', { element(e) { e.setInnerContent(title) } })
+    .on('meta[name="description"], meta[property^="og:"], meta[name^="twitter:"]', { element(e) { e.remove() } })
+    .on('head', { element(e) { e.append(tags, { html: true }) } })
+    .transform(new Response(shell.body, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300' } }))
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url)
+    if (url.pathname.startsWith('/product/') && req.method === 'GET') {
+      try { return await productPage(req, env, url) } catch (e) { return env.ASSETS.fetch(req) }
+    }
     if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(req)
     if (url.pathname === '/api/order' && req.method === 'POST') {
       try { await saveOrder(env, await req.json()); return json({ ok: true }) } catch (e) { return json({ error: String(e && e.message ? e.message : e) }, 400) }
