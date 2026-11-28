@@ -474,7 +474,9 @@
     "featured": true,
     "isNew": false,
     "createdAt": "2026-11-18",
-    "og": "/img/og-kids-school-backpack.jpg"
+    "og": "/img/og-kids-school-backpack.jpg",
+    "flashPrice": 4500,
+    "flashEnds": "2026-11-29T09:59:00.452Z"
   },
   {
     "id": "p-1010",
