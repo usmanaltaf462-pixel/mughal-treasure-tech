@@ -1,5 +1,33 @@
 [
   {
+    "id": "p-1795832514679",
+    "slug": "magnetic-induction-charging-case-f9-b8mv",
+    "name": "Magnetic Induction Charging Case F9",
+    "nameUr": "مغناطیسی انڈکشن چارجنگ کیسی",
+    "categoryId": "c-electronics",
+    "images": [
+      "/img/magnetic-induction-charging-case-f9-b8mv-1.webp",
+      "/img/magnetic-induction-charging-case-f9-b8mv-2.webp"
+    ],
+    "shortDescription": "Upgrade your charging experience",
+    "description": "This magnetic induction charging case is a convenient way to charge your devices. It has a sleek and compact design that makes it easy to carry around. The case features a magnetic induction charging system that allows for fast and efficient charging.",
+    "highlights": [
+      "Fast charging",
+      "Compact design",
+      "Magnetic induction technology",
+      "Easy to use"
+    ],
+    "price": 1000,
+    "salePrice": 850,
+    "stock": 20,
+    "rating": 0,
+    "reviews": 0,
+    "featured": true,
+    "isNew": true,
+    "createdAt": "2026-11-28",
+    "og": "/img/og-magnetic-induction-charging-case-f9-b8mv.jpg"
+  },
+  {
     "id": "p-1795523520500",
     "slug": "usb-c-to-usb-a-cable-cf78",
     "name": "USB-C to USB-A Cable",
