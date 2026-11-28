@@ -1,8 +1,8 @@
 import { discountPercent, effectivePrice } from '@/data/catalog'
-import type { Product } from '@/data/catalog'
+import type { PriceFields } from '@/data/catalog'
 import { formatPKR } from '@/lib/format'
 
-export function Price({ product, size = 'md' }: { product: Pick<Product, 'price' | 'salePrice'>; size?: 'md' | 'lg' }) {
+export function Price({ product, size = 'md' }: { product: PriceFields; size?: 'md' | 'lg' }) {
   const off = discountPercent(product)
   const big = size === 'lg'
   return (

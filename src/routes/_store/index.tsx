@@ -3,7 +3,8 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { ProductCard } from '@/components/ProductCard'
 import { Perks } from '@/components/Footer'
-import { categories, products } from '@/data/catalog'
+import { Countdown } from '@/components/Countdown'
+import { categories, discountPercent, dropActive, flashActive, products } from '@/data/catalog'
 import { img } from '@/lib/format'
 
 export const Route = createFileRoute('/_store/')({
@@ -80,11 +81,38 @@ function Home() {
   const featured: typeof products = []
   for (let n = 0; n < 8; n++) for (const list of byCat) if (list[n]) featured.push(list[n])
   const newArrivals = [...products].filter((p) => p.isNew).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-  const deals = products.filter((p) => p.salePrice).slice(0, 4)
+  const deals = products.filter((p) => discountPercent(p) > 0).slice(0, 4)
+  const flash = products.filter((p) => flashActive(p))
+  const drops = products.filter((p) => dropActive(p)).slice(0, 4)
+  const soonest = flash.map((p) => p.flashEnds as string).sort()[0]
+  const [, refresh] = useState(0)
 
   return (
     <div className="space-y-14 pb-6 md:space-y-20">
       <Hero />
+
+      {flash.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4">
+          <div className="rounded-3xl p-4 text-white sm:p-6" style={{ background: 'linear-gradient(135deg,#b91c1c,#f97316)' }}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-wider text-white/90">⚡ Flash Sale</p>
+                <h2 className="font-display text-2xl font-bold sm:text-3xl">Sirf kuch der ke liye!</h2>
+                <p className="urdu text-base text-white/90">فلیش سیل، جلدی کریں</p>
+              </div>
+              <div className="rounded-2xl bg-white/15 px-4 py-2 text-center">
+                <div className="text-[11px] font-semibold uppercase">Ends in</div>
+                <Countdown to={soonest} onEnd={() => refresh((n) => n + 1)} className="font-mono text-2xl font-extrabold tabular-nums" />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-ink md:grid-cols-4">
+              {flash.slice(0, 8).map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
       <Perks />
 
       <section className="mx-auto max-w-7xl px-4">
@@ -110,6 +138,17 @@ function Home() {
           ))}
         </div>
       </section>
+
+      {drops.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4">
+          <SectionTitle title="Price Drop 📉" ur="قیمت میں کمی" to={<Link to="/shop" search={{ sale: true }} className="text-sm font-semibold text-brand-600 hover:underline">See more</Link>} />
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4">
+            {drops.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-7xl px-4">
         <div className="mughal-pattern relative overflow-hidden rounded-3xl bg-brand-500 p-6 text-white sm:p-10">

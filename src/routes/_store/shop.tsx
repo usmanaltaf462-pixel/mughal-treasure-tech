@@ -2,7 +2,7 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { useState } from 'react'
 import { ProductCard } from '@/components/ProductCard'
-import { categories, effectivePrice, getCategoryBySlug, products } from '@/data/catalog'
+import { categories, discountPercent, effectivePrice, getCategoryBySlug, products } from '@/data/catalog'
 import { formatPKR } from '@/lib/format'
 
 type Sort = 'featured' | 'newest' | 'price-asc' | 'price-desc' | 'discount'
@@ -49,7 +49,7 @@ function Shop() {
   const q = search.q?.toLowerCase().trim()
   let list = products.filter((p) => {
     if (category && p.categoryId !== category.id) return false
-    if (search.sale && !p.salePrice) return false
+    if (search.sale && discountPercent(p) === 0) return false
     if (search.inStock && p.stock <= 0) return false
     if (search.max && effectivePrice(p) > search.max) return false
     if (q) {

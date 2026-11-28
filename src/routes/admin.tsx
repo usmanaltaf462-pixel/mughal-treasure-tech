@@ -12,6 +12,11 @@ const empty = { name: '', nameUr: '', shortDescription: '', description: '', hig
 
 // ---------- Share card (WhatsApp Status / Facebook post) ----------
 const loadImg = (src: string) => new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src })
+function flashOn(p: P) { return !!p.flashPrice && !!p.flashEnds && new Date(p.flashEnds).getTime() > Date.now() }
+function curPrice(p: P): number {
+  if (flashOn(p) && Number(p.flashPrice) < Number(p.price)) return Number(p.flashPrice)
+  return p.salePrice && Number(p.salePrice) < Number(p.price) ? Number(p.salePrice) : Number(p.price)
+}
 const money = (n: number) => 'Rs ' + Number(n).toLocaleString('en-PK')
 type Fmt = 'square' | 'story'
 const LAYOUT = {
@@ -52,7 +57,7 @@ async function makeCard(p: P, fmt: Fmt): Promise<Blob> {
     const k = Math.min(bw / im.naturalWidth, bh / im.naturalHeight); const w = im.naturalWidth * k; const h = im.naturalHeight * k
     x.save(); rr(x, px + 8, L.photoY + 8, L.photoW - 16, L.photoH - 16, 30); x.clip(); x.drawImage(im, px + (L.photoW - w) / 2, L.photoY + (L.photoH - h) / 2, w, h); x.restore()
   } catch { /* photo missing */ }
-  const price = Number(p.salePrice || p.price); const old = p.salePrice && Number(p.price) > Number(p.salePrice) ? Number(p.price) : 0
+  const price = curPrice(p); const old = price < Number(p.price) ? Number(p.price) : 0
   if (old) {
     const off = Math.round((1 - price / old) * 100); const bw = L.W * 0.2; const bh = L.W * 0.075
     x.fillStyle = '#16a34a'; rr(x, px + L.photoW - bw - 24, L.photoY + 24, bw, bh, bh / 2); x.fill()
@@ -99,10 +104,11 @@ async function makeOgCard(p: P, photoSrc: string): Promise<Blob> {
 }
 
 function makeCaption(p: P) {
-  const price = Number(p.salePrice || p.price); const old = p.salePrice && Number(p.price) > Number(p.salePrice) ? Number(p.price) : 0
+  const price = curPrice(p); const old = price < Number(p.price) ? Number(p.price) : 0
   return [
     `🔥 ${p.name}`, p.shortDescription ? `✨ ${p.shortDescription}` : '',
     `💰 Price: ${money(price)}${old ? ` (pehle ${money(old)})` : ''}`,
+    ...(flashOn(p) ? ['⚡ FLASH SALE — sirf kuch der ke liye, jaldi karein!'] : []),
     '✅ Cash on Delivery — poore Pakistan mein', '🚚 Delivery 2–5 working days',
     `📲 Order karein WhatsApp par: ${SITE.phoneDisplay}`, `🛒 ${location.origin}/product/${p.slug}`,
   ].filter(Boolean).join('\n')
@@ -265,7 +271,7 @@ function Admin() {
     setMsg('Is browser mein direct share nahi hota: image download ho gayi aur caption copy ho gaya. WhatsApp ya Facebook mein jaa kar image lagayein aur caption paste karein.')
   }
   const shareUrl = () => location.origin + '/product/' + shareFor?.slug
-  const shortText = () => { const pr = Number(shareFor?.salePrice || shareFor?.price); return `🔥 ${shareFor?.name} — ${money(pr)}\n✅ Cash on Delivery all over Pakistan` }
+  const shortText = () => { const pr = shareFor ? curPrice(shareFor) : 0; return `🔥 ${shareFor?.name} — ${money(pr)}\n✅ Cash on Delivery all over Pakistan` }
   const shareLink = async () => {
     const nav = navigator as any
     if (nav.share) { try { await nav.share({ title: shareFor?.name, text: shortText(), url: shareUrl() }); return } catch (e: any) { if (e?.name === 'AbortError') return } }
@@ -278,13 +284,28 @@ function Admin() {
     try { await navigator.clipboard.writeText(location.origin); setMsg('✅ Website ka link copy ho gaya.') } catch { setMsg(location.origin) }
   }
   const copySite = async () => { try { await navigator.clipboard.writeText(location.origin); setMsg('✅ Website ka link copy ho gaya.') } catch { setMsg(location.origin) } }
+  const flash = (p: P) => {
+    if (flashOn(p)) { commit((products || []).map((x) => (x.id === p.id ? { ...x, flashPrice: null, flashEnds: null } : x)), {}, 'Flash sale band ho gayi (1-2 minute mein).'); return }
+    const base = curPrice(p)
+    const fp = prompt(`${p.name}\nFlash sale ki qeemat (abhi Rs ${base}):`, String(Math.round(base * 0.85))); if (fp === null) return
+    const hrs = prompt('Flash sale kitne ghante chalegi? (jaise 24)', '24'); if (hrs === null) return
+    const f = Number(fp); const h = Number(hrs)
+    if (!(f > 0 && f < Number(p.price)) || !(h > 0)) { setMsg('Flash qeemat asli qeemat se kam aur ghante 0 se zyada hone chahiye.'); return }
+    commit((products || []).map((x) => (x.id === p.id ? { ...x, flashPrice: f, flashEnds: new Date(Date.now() + h * 3600e3).toISOString() } : x)), {}, `Flash sale shuru! ${h} ghante tak (1-2 minute mein site par nazar aayegi).`)
+  }
   const toggleFeatured = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, featured: !x.featured } : x)), {}, p.featured ? 'Featured se hata diya (1-2 minute mein).' : 'Featured mein add ho gaya (1-2 minute mein).')
   const toggleHide = (p: P) => commit((products || []).map((x) => (x.id === p.id ? { ...x, hidden: !x.hidden } : x)), {}, p.hidden ? 'Product dobara dikhne laga (1-2 minute mein).' : 'Product hide ho gaya (1-2 minute mein store se hat jayega).')
   const edit = (p: P) => {
     const np = prompt(`${p.name}\nNayi qeemat:`, String(p.price)); if (np === null) return
     const ns = prompt('Sale price (khali = koi nahi):', p.salePrice ? String(p.salePrice) : ''); if (ns === null) return
     const nk = prompt('Stock:', String(p.stock)); if (nk === null) return
-    commit((products || []).map((x) => x.id === p.id ? { ...x, price: Number(np), salePrice: ns ? Number(ns) : null, stock: Number(nk) } : x), {}, 'Update ho gaya (1-2 minute mein site par).')
+    const eff = (q: P) => (q.salePrice && Number(q.salePrice) < Number(q.price) ? Number(q.salePrice) : Number(q.price))
+    commit((products || []).map((x) => {
+      if (x.id !== p.id) return x
+      const next = { ...x, price: Number(np), salePrice: ns ? Number(ns) : null, stock: Number(nk) }
+      const drop = eff(next) === eff(x) ? (x.drop ?? null) : eff(next) < eff(x) ? { from: eff(x), at: new Date().toISOString() } : null
+      return { ...next, drop }
+    }), {}, 'Update ho gaya (1-2 minute mein site par). Qeemat kam ki ho to "Price Drop" mein bhi nazar aayega.')
   }
 
   const inp = 'w-full rounded-xl border border-black/15 bg-white px-3 py-2.5 text-base'
@@ -450,9 +471,10 @@ function Admin() {
             {products.map((p) => (
               <div key={p.id} className={'flex items-center gap-3 rounded-xl border border-black/10 p-2 ' + (p.hidden ? 'opacity-50' : '')}>
                 <img src={p.images[0]} alt="" className="h-14 w-14 rounded-lg object-cover" />
-                <div className="min-w-0 flex-1 text-sm"><div className="truncate font-semibold">{p.name}</div><div>Rs {p.salePrice || p.price} · stock {p.stock}{p.featured ? ' · ★' : ''}{p.hidden ? ' · HIDDEN' : ''}</div></div>
+                <div className="min-w-0 flex-1 text-sm"><div className="truncate font-semibold">{p.name}</div><div>Rs {curPrice(p)} · stock {p.stock}{p.featured ? ' · ★' : ''}{flashOn(p) ? ' · ⚡' : ''}{p.hidden ? ' · HIDDEN' : ''}</div></div>
                 <div className="flex max-w-[48%] flex-wrap justify-end gap-x-3 gap-y-1">
                 <button className="text-sm font-semibold text-green-700" onClick={() => openShare(p)}>Share</button>
+                <button className="text-sm font-semibold text-fuchsia-600" disabled={busy} onClick={() => flash(p)}>{flashOn(p) ? 'Flash band' : '⚡ Flash'}</button>
                 <button className="text-sm font-semibold text-brand-600" disabled={busy} onClick={() => edit(p)}>Edit</button>
                 <button className="text-sm font-semibold text-black/60" disabled={busy} onClick={() => toggleHide(p)}>{p.hidden ? 'Show' : 'Hide'}</button>
                 <button className="text-sm font-semibold text-amber-600" disabled={busy} onClick={() => toggleFeatured(p)}>{p.featured ? 'Unfeature' : 'Feature'}</button>

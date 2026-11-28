@@ -31,6 +31,9 @@ export interface Product {
   price: number
   /** Discounted sale price in PKR, if on sale. */
   salePrice?: number | null
+  flashPrice?: number | null // flash sale price, used only until flashEnds
+  flashEnds?: string | null // ISO time when the flash sale stops
+  drop?: { from: number; at: string } | null // set when the price was lowered
   stock: number
   rating: number
   reviews: number
@@ -71,10 +74,19 @@ export function getProduct(id: string) {
   // Includes hidden products so existing carts and orders keep working.
   return allProducts.find((p) => p.id === id)
 }
-export function effectivePrice(p: Pick<Product, 'price' | 'salePrice'>) {
+export type PriceFields = Pick<Product, 'price' | 'salePrice'> & Partial<Pick<Product, 'flashPrice' | 'flashEnds'>>
+export function flashActive(p: Partial<Pick<Product, 'flashPrice' | 'flashEnds'>>) {
+  return !!p.flashPrice && !!p.flashEnds && new Date(p.flashEnds).getTime() > Date.now()
+}
+export function effectivePrice(p: PriceFields) {
+  if (flashActive(p) && (p.flashPrice as number) < p.price) return p.flashPrice as number
   return p.salePrice && p.salePrice < p.price ? p.salePrice : p.price
 }
-export function discountPercent(p: Pick<Product, 'price' | 'salePrice'>) {
-  if (!p.salePrice || p.salePrice >= p.price) return 0
-  return Math.round(((p.price - p.salePrice) / p.price) * 100)
+export function discountPercent(p: PriceFields) {
+  const e = effectivePrice(p)
+  return e < p.price ? Math.round(((p.price - e) / p.price) * 100) : 0
+}
+// A recent price drop (last 14 days) that is still in effect.
+export function dropActive(p: Product) {
+  return !!p.drop && Date.now() - new Date(p.drop.at).getTime() < 14 * 864e5 && effectivePrice(p) < p.drop.from
 }

@@ -149,7 +149,8 @@ async function productPage(req, env, url) {
   if (!p) return env.ASSETS.fetch(req)
   const shell = await env.ASSETS.fetch(new Request(url.origin + '/'))
   if (!shell.ok) return env.ASSETS.fetch(req)
-  const price = Number(p.salePrice || p.price).toLocaleString('en-PK')
+  const flashOn = p.flashPrice && p.flashEnds && Date.parse(p.flashEnds) > Date.now() && p.flashPrice < p.price
+  const price = Number(flashOn ? p.flashPrice : p.salePrice && p.salePrice < p.price ? p.salePrice : p.price).toLocaleString('en-PK')
   const title = `${p.name} — Rs ${price} | Mughal Treasure Tech`
   const desc = `${p.shortDescription || p.name} Cash on Delivery all over Pakistan.`
   const image = url.origin + (p.og || '/img/og-image.jpg')

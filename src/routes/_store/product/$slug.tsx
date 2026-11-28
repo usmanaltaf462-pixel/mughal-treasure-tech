@@ -5,9 +5,10 @@ import { QtyStepper } from '@/components/CartDrawer'
 import { Price } from '@/components/Price'
 import { ProductCard } from '@/components/ProductCard'
 import { Reviews } from '@/components/Reviews'
-import { getCategory, getProductBySlug, products } from '@/data/catalog'
+import { getCategory, getProductBySlug, products, dropActive, flashActive } from '@/data/catalog'
+import { Countdown } from '@/components/Countdown'
 import { useCart } from '@/lib/cart'
-import { img } from '@/lib/format'
+import { formatPKR, img } from '@/lib/format'
 
 export const Route = createFileRoute('/_store/product/$slug')({
   loader: ({ params }) => {
@@ -93,7 +94,13 @@ function ProductPage() {
           )}
 
           <div className="mt-5">
+            {flashActive(product) && (
+              <div className="mb-2 flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-600">
+                ⚡ Flash Sale — ends in <Countdown to={product.flashEnds as string} className="font-mono tabular-nums" />
+              </div>
+            )}
             <Price product={product} size="lg" />
+            {dropActive(product) && product.drop && <p className="mt-1 text-sm font-semibold text-emerald-700">📉 Price drop: pehle {formatPKR(product.drop.from)}</p>}
             <p className="mt-1 text-xs text-ink/50">Inclusive of all taxes</p>
           </div>
 

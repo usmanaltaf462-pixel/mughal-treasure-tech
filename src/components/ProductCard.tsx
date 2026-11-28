@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { Plus, Star } from 'lucide-react'
-import { discountPercent, getCategory } from '@/data/catalog'
+import { discountPercent, dropActive, flashActive, getCategory } from '@/data/catalog'
 import type { Product } from '@/data/catalog'
 import { img } from '@/lib/format'
 import { useCart } from '@/lib/cart'
@@ -22,6 +22,8 @@ export function ProductCard({ product }: { product: Product }) {
           className={`h-full w-full object-cover transition duration-500 group-hover:scale-105 ${soldOut ? 'opacity-60 grayscale' : ''}`}
         />
         <div className="absolute left-2 top-2 flex flex-col gap-1">
+          {flashActive(product) && <span className="rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-bold text-white shadow">⚡ FLASH</span>}
+          {dropActive(product) && <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow">📉 PRICE DROP</span>}
           {off > 0 && <span className="rounded-full bg-brand-500 px-2.5 py-1 text-[11px] font-bold text-white shadow">-{off}%</span>}
           {product.isNew && <span className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-bold text-white">NEW</span>}
         </div>
