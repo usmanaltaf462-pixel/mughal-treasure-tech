@@ -200,7 +200,9 @@
     "featured": true,
     "isNew": true,
     "createdAt": "2026-11-21",
-    "hidden": true
+    "hidden": true,
+    "flashPrice": 600,
+    "flashEnds": "2026-11-29T08:19:28.267Z"
   },
   {
     "id": "p-2002",
