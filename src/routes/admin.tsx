@@ -151,18 +151,29 @@ function Admin() {
   useEffect(() => { try { setKey(localStorage.getItem('adminKey') || '') } catch { /* ignore */ } }, [])
 
   async function api(path: string, body?: unknown) {
-    const res = await fetch(path, {
+    const send = () => fetch(path, {
       method: body ? 'POST' : 'GET',
       headers: { 'x-admin-key': key, 'content-type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined,
     })
+    let res: Response
+    try {
+      res = await send()
+    } catch {
+      // Phone network can drop for a moment: wait a little and try once more.
+      await new Promise((r) => setTimeout(r, 1500))
+      try { res = await send() } catch { throw new Error('Internet ka masla: request server tak nahi pohanchi. Thori der baad dobara try karein. (List refresh ho gayi hai, dekh lein ke tabdeeli hui ya nahi.)') }
+    }
     const data = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error(data.error || `Error ${res.status}`)
     return data
   }
   async function run(label: string, fn: () => Promise<void>) {
     setBusy(true); setMsg(label)
-    try { await fn() } catch (e: any) { setMsg('❌ ' + e.message) }
+    try { await fn() } catch (e: any) {
+      setMsg('❌ ' + e.message)
+      if (products) { try { setProducts(await api('/api/products')) } catch { /* still offline */ } }
+    }
     setBusy(false)
   }
   const login = () => run('Login ho raha hai…', async () => {
