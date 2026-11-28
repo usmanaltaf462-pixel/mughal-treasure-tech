@@ -72,7 +72,7 @@ async function saveOrder(env, o) {
     .bind(str(o.id, 40), new Date().toISOString(), 'new', str(c.name, 80), str(c.phone, 30), str(c.city, 60), str(c.address, 300), str(c.notes, 300), JSON.stringify(items), num(o.subtotal), num(o.delivery), num(o.total)).run()
 }
 
-const IMG_PATH = /^public\/img\/[a-z0-9-]{1,80}\.webp$/
+const IMG_PATH = /^public\/img\/[a-z0-9-]{1,80}\.(webp|jpg)$/
 
 async function commit(env, products, images) {
   if (!Array.isArray(products)) throw new Error('products must be a list')
