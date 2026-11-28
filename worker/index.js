@@ -57,19 +57,45 @@ async function ensure(env) {
   await env.DB.prepare(VISITS_SCHEMA).run()
   await env.DB.prepare('CREATE INDEX IF NOT EXISTS visits_day ON visits(day)').run()
   try { await env.DB.prepare('ALTER TABLE orders ADD COLUMN tracking TEXT').run() } catch (e) { /* column already exists */ }
+  for (const col of ['ip TEXT', 'flags TEXT', 'phone10 TEXT']) {
+    try { await env.DB.prepare('ALTER TABLE orders ADD COLUMN ' + col).run() } catch (e) { /* column already exists */ }
+  }
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS blocked (phone10 TEXT PRIMARY KEY, note TEXT, created_at TEXT)').run()
+  await env.DB.prepare("UPDATE orders SET phone10 = substr(replace(replace(replace(replace(phone, ' ', ''), '-', ''), '+', ''), '.', ''), -10) WHERE phone10 IS NULL").run()
   ready = true
 }
 const digits = (v) => String(v || '').replace(/\D/g, '').slice(-10)
 const str = (v, n) => String(v == null ? '' : v).slice(0, n)
 const num = (v) => (Number.isFinite(Number(v)) ? Math.max(0, Math.round(Number(v))) : 0)
 
-async function saveOrder(env, o) {
+async function saveOrder(env, o, req) {
   const c = (o && o.customer) || {}
   if (!o || !o.id || !c.name || !c.phone || !Array.isArray(o.items) || !o.items.length || o.items.length > 40) throw new Error('Bad order')
   await ensure(env)
   const items = o.items.map((i) => ({ name: str(i.name, 120), qty: num(i.qty), unitPrice: num(i.unitPrice), productId: str(i.productId, 40) }))
-  await env.DB.prepare('INSERT OR IGNORE INTO orders (id, created_at, status, name, phone, city, address, notes, items, subtotal, delivery, total) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
-    .bind(str(o.id, 40), new Date().toISOString(), 'new', str(c.name, 80), str(c.phone, 30), str(c.city, 60), str(c.address, 300), str(c.notes, 300), JSON.stringify(items), num(o.subtotal), num(o.delivery), num(o.total)).run()
+  // Quiet checks for suspicious orders. The customer never sees any of this.
+  const phone10 = digits(c.phone)
+  const ip = await hashIp(req.headers.get('cf-connecting-ip') || 'unknown')
+  const dayAgo = new Date(Date.now() - 864e5).toISOString()
+  const one = (sql, ...a) => env.DB.prepare(sql).bind(...a).first()
+  const [byPhone, byIp, cancelled, blocked] = await Promise.all([
+    one('SELECT COUNT(*) AS n FROM orders WHERE phone10 = ? AND created_at > ?', phone10, dayAgo),
+    one('SELECT COUNT(*) AS n FROM orders WHERE ip = ? AND created_at > ?', ip, dayAgo),
+    one("SELECT COUNT(*) AS n FROM orders WHERE phone10 = ? AND status = 'cancelled'", phone10),
+    one('SELECT 1 AS x FROM blocked WHERE phone10 = ?', phone10),
+  ])
+  const flags = []
+  if (!/^3\d{9}$/.test(phone10)) flags.push('Phone number mobile jaisa nahi lagta')
+  if (str(c.address, 300).trim().length < 15) flags.push('Address bohat chhota hai')
+  if (!/\p{L}{3,}/u.test(str(c.name, 80))) flags.push('Naam ajeeb lagta hai')
+  if (byPhone && byPhone.n >= 2) flags.push(`Is number se 24 ghante mein ${byPhone.n + 1} orders`)
+  if (byIp && byIp.n >= 2) flags.push(`Ek hi internet se 24 ghante mein ${byIp.n + 1} orders`)
+  if (cancelled && cancelled.n >= 2) flags.push(`Is number ke ${cancelled.n} pehle orders cancel hue`)
+  if (num(o.total) > 15000) flags.push('Bara order, pehle zaroor confirm karein')
+  let status = 'new'
+  if (blocked) { flags.unshift('BLOCKED number'); status = 'cancelled' }
+  await env.DB.prepare('INSERT OR IGNORE INTO orders (id, created_at, status, name, phone, city, address, notes, items, subtotal, delivery, total, ip, flags, phone10) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(str(o.id, 40), new Date().toISOString(), status, str(c.name, 80), str(c.phone, 30), str(c.city, 60), str(c.address, 300), str(c.notes, 300), JSON.stringify(items), num(o.subtotal), num(o.delivery), num(o.total), ip, JSON.stringify(flags), phone10).run()
 }
 
 const IMG_PATH = /^public\/img\/[a-z0-9-]{1,80}\.(webp|jpg)$/
@@ -170,7 +196,7 @@ export default {
     }
     if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(req)
     if (url.pathname === '/api/order' && req.method === 'POST') {
-      try { await saveOrder(env, await req.json()); return json({ ok: true }) } catch (e) { return json({ error: String(e && e.message ? e.message : e) }, 400) }
+      try { await saveOrder(env, await req.json(), req); return json({ ok: true }) } catch (e) { return json({ error: String(e && e.message ? e.message : e) }, 400) }
     }
     if (url.pathname === '/api/track' && req.method === 'POST') {
       try {
@@ -277,10 +303,24 @@ export default {
         await env.DB.prepare('DELETE FROM reviews WHERE id = ?').bind(Number(id)).run()
         return json({ ok: true })
       }
+      if (url.pathname === '/api/block' && req.method === 'POST') {
+        const { phone } = await req.json()
+        const p10 = digits(phone)
+        if (p10.length < 10) return json({ error: 'Phone number theek nahi' }, 400)
+        await ensure(env)
+        await env.DB.prepare('INSERT OR REPLACE INTO blocked (phone10, note, created_at) VALUES (?,?,?)').bind(p10, 'admin', new Date().toISOString()).run()
+        return json({ ok: true })
+      }
+      if (url.pathname === '/api/unblock' && req.method === 'POST') {
+        const { phone } = await req.json()
+        await ensure(env)
+        await env.DB.prepare('DELETE FROM blocked WHERE phone10 = ?').bind(digits(phone)).run()
+        return json({ ok: true })
+      }
       if (url.pathname === '/api/orders' && req.method === 'GET') {
         await ensure(env)
-        const { results } = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC LIMIT 500').all()
-        return json(results.map((r) => ({ ...r, status: r.status === 'shipped' ? 'dispatched' : r.status, items: JSON.parse(r.items || '[]') })))
+        const { results } = await env.DB.prepare('SELECT o.*, (SELECT 1 FROM blocked b WHERE b.phone10 = o.phone10) AS blocked FROM orders o ORDER BY created_at DESC LIMIT 500').all()
+        return json(results.map(({ ip, ...r }) => ({ ...r, status: r.status === 'shipped' ? 'dispatched' : r.status, items: JSON.parse(r.items || '[]'), flags: JSON.parse(r.flags || '[]'), blocked: !!r.blocked })))
       }
       if (url.pathname === '/api/order-status' && req.method === 'POST') {
         const { id, status, tracking } = await req.json()

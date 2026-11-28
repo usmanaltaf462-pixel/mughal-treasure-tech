@@ -141,6 +141,7 @@ function Admin() {
   const [customers, setCustomers] = useState<P[] | null>(null)
   const [reviews, setReviews] = useState<P[] | null>(null)
   const [q, setQ] = useState('')
+  const [onlyFlagged, setOnlyFlagged] = useState(false)
   const [stats, setStats] = useState<P | null>(null)
   const [shareFor, setShareFor] = useState<P | null>(null)
   const [fmt, setFmt] = useState<Fmt>('story')
@@ -179,6 +180,10 @@ function Admin() {
   const login = () => run('Login ho raha hai…', async () => {
     try { localStorage.setItem('adminKey', key); localStorage.setItem('mt-owner', '1') } catch { /* ignore */ }
     setProducts(await api('/api/products')); setMsg('')
+  })
+  const toggleBlock = (o: P) => confirm(o.blocked ? 'Is number ko unblock karein?' : `${o.phone} ko block karein? Is number ke aage ke orders khud "cancelled" mark ho jayenge (customer ko pata nahi chalega).`) && run('Update ho raha hai…', async () => {
+    await api(o.blocked ? '/api/unblock' : '/api/block', { phone: o.phone })
+    setOrders(await api('/api/orders')); setMsg('✅ Ho gaya')
   })
   const loadOrders = () => run('Orders load ho rahe hain…', async () => { setOrders(await api('/api/orders')); setMsg('') })
   const loadCustomers = () => run('Customers load ho rahe hain…', async () => { setCustomers(await api('/api/customers')); setMsg('') })
@@ -338,13 +343,17 @@ function Admin() {
           </div>
           {tab === 'orders' && (
             <section className="space-y-3">
-              <h2 className="font-bold">Orders ({orders?.length ?? 0})</h2>
-              {(orders || []).map((o) => (
-                <div key={o.id} className="space-y-1 rounded-2xl border border-black/10 p-3 text-sm">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-bold">Orders ({orders?.length ?? 0})</h2>
+                <label className="flex items-center gap-1.5 text-sm"><input type="checkbox" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} /> Sirf shak wale ({(orders || []).filter((o) => o.flags?.length).length})</label>
+              </div>
+              {(orders || []).filter((o) => !onlyFlagged || o.flags?.length).map((o) => (
+                <div key={o.id} className={'space-y-1 rounded-2xl border p-3 text-sm ' + (o.flags?.length ? 'border-red-300 bg-red-50/40' : 'border-black/10')}>
                   <div className="flex justify-between font-semibold"><span>{o.id}</span><span>Rs {o.total.toLocaleString()}</span></div>
                   <div className="text-black/50">{new Date(o.created_at).toLocaleString()}</div>
                   <div>{o.name} · <a className="text-brand-600" href={'tel:' + o.phone}>{o.phone}</a> · <a className="text-brand-600" href={wa(o.phone)}>WhatsApp</a></div>
                   <div>{o.address}, {o.city}</div>
+                  {o.flags?.length > 0 && <div className="flex flex-wrap gap-1">{o.flags.map((f: string) => <span key={f} className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">⚠ {f}</span>)}</div>}
                   {o.notes && <div className="text-black/60">Note: {o.notes}</div>}
                   <ul className="list-disc pl-5">{o.items.map((i: P, k: number) => <li key={k}>{i.name} × {i.qty}</li>)}</ul>
                   <select className={inp} value={o.status} disabled={busy} onChange={(e) => setStatus(o, e.target.value)}>
@@ -352,6 +361,7 @@ function Admin() {
                   </select>
                   <input className={inp} placeholder="PostEx tracking number" defaultValue={o.tracking || ''} onBlur={(e) => e.target.value.trim() !== (o.tracking || '') && setStatus(o, o.status, e.target.value.trim())} />
                   <a className="block rounded-full bg-[#25D366] px-4 py-2.5 text-center font-semibold text-white" target="_blank" rel="noreferrer" href={wa(o.phone) + '?text=' + encodeURIComponent(msgFor(o))}>Customer ko WhatsApp bhejein</a>
+                  <button className="w-full rounded-full bg-black/5 px-4 py-2 text-sm font-semibold text-red-700" disabled={busy} onClick={() => toggleBlock(o)}>{o.blocked ? 'Number unblock karein' : 'Is number ko block karein'}</button>
                 </div>
               ))}
               {orders && !orders.length && <p className="text-black/50">Abhi koi order nahi.</p>}
