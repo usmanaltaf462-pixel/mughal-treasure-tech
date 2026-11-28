@@ -1,5 +1,33 @@
 [
   {
+    "id": "p-1795884190288",
+    "slug": "wireless-earbuds-i12-2tsg",
+    "name": "Wireless Earbuds I12",
+    "nameUr": "Wireless Earbuds I12",
+    "categoryId": "c-electronics",
+    "images": [
+      "/img/wireless-earbuds-i12-2tsg-1.webp",
+      "/img/wireless-earbuds-i12-2tsg-2.webp"
+    ],
+    "shortDescription": "Listen to music on the go",
+    "description": "This product is a pair of white wireless earbuds with a charging case. The case has a lid that opens to reveal the earbuds. There is a USB cable and a manual included.",
+    "highlights": [
+      "Wireless",
+      "Bluetooth",
+      "Long battery life",
+      "Comfortable fit"
+    ],
+    "price": 950,
+    "salePrice": 800,
+    "stock": 20,
+    "rating": 0,
+    "reviews": 0,
+    "featured": true,
+    "isNew": true,
+    "createdAt": "2026-11-28",
+    "og": "/img/og-wireless-earbuds-i12-2tsg.jpg"
+  },
+  {
     "id": "p-1795832514679",
     "slug": "magnetic-induction-charging-case-f9-b8mv",
     "name": "Magnetic Induction Charging Case F9",
